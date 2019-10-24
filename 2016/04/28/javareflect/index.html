@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Teng Jun" />
+
+
+
+<meta name="description" content="今天介绍下Java的反射机制，以前我们获取一个类的实例都是使用new一个实例出来。那样太low了，今天跟我一起来学习学习一种更加高大上的方式来实现。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java基础与提高干货系列——Java反射机制">
+<meta property="og:url" content="http://tengj.top/2016/04/28/javareflect/index.html">
+<meta property="og:site_name" content="嘟嘟独立博客">
+<meta property="og:description" content="今天介绍下Java的反射机制，以前我们获取一个类的实例都是使用new一个实例出来。那样太low了，今天跟我一起来学习学习一种更加高大上的方式来实现。">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/Javareflect.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/javaLearn.PNG">
+<meta property="og:updated_time" content="2017-03-18T00:14:32.960Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java基础与提高干货系列——Java反射机制">
+<meta name="twitter:description" content="今天介绍下Java的反射机制，以前我们获取一个类的实例都是使用new一个实例出来。那样太low了，今天跟我一起来学习学习一种更加高大上的方式来实现。">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="嘟嘟独立博客" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/img/author.jpg">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css" type="text/css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>Java基础与提高干货系列——Java反射机制 | 嘟嘟独立博客</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script>
+        yiliaConfig.jquery_ui = [true, "//cdn.bootcss.com/jqueryui/1.10.4/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/dudu.gif" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">嘟嘟独立博客</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">爱生活爱编码</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="/358593266@qq.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="http://weibo.com/u/2550837117" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/tengj" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa 简书" href="http://www.jianshu.com/u/a7f72d78fe0d" title="简书"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/IDEA/">IDEA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jQuery/">jQuery</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/listary/">listary</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springMVC/">springMVC</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">专注于前端</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Teng Jun</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/dudu.gif" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Teng Jun</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">爱生活爱编码</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="/358593266@qq.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="http://weibo.com/u/2550837117" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/tengj" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa 简书" target="_blank" href="http://www.jianshu.com/u/a7f72d78fe0d" title="简书"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-javareflect" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/04/28/javareflect/" class="article-date">
+      <time datetime="2016-04-28T12:04:00.000Z" itemprop="datePublished">2016-04-28</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Java基础与提高干货系列——Java反射机制
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/Java基础与提高干货系列/">Java基础与提高干货系列</a>
+    </div>
+
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>今天介绍下Java的反射机制，以前我们获取一个类的实例都是使用new一个实例出来。那样太low了，今天跟我一起来学习学习一种更加高大上的方式来实现。</p>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><h2 id="Java反射机制定义"><a href="#Java反射机制定义" class="headerlink" title="Java反射机制定义"></a>Java反射机制定义</h2><p>Java反射机制是指在运行状态中，对于任意一个类，都能够知道这个类的所有属性和方法；对于任意一个对象，都能够调用它的任意一个方法和属性；这种动态获取的信息以及动态调用对象的方法的功能称为java语言的反射机制。<br>用一句话总结就是反射可以实现在运行时可以知道任意一个类的属性和方法。</p>
+<h2 id="反射机制的优点与缺点"><a href="#反射机制的优点与缺点" class="headerlink" title="反射机制的优点与缺点"></a>反射机制的优点与缺点</h2><p>为什么要用反射机制？直接创建对象不就可以了吗，这就涉及到了动态与静态的概念</p>
+<ul>
+<li>静态编译：在编译时确定类型，绑定对象,即通过。</li>
+<li><p>动态编译：运行时确定类型，绑定对象。动态编译最大限度发挥了java的灵活性，体现了多态的应用，有以降低类之间的藕合性。</p>
+</li>
+<li><p>优点<br>可以实现动态创建对象和编译，体现出很大的灵活性，特别是在J2EE的开发中它的灵活性就表现的十分明显。比如，一个大型的软件，不可能一次就把把它设计的很完美，当这个程序编译后，发布了，当发现需要更新某些功能时，我们不可能要用户把以前的卸载，再重新安装新的版本，假如这样的话，这个软件肯定是没有多少人用的。采用静态的话，需要把整个程序重新编译一次才可以实现功能的更新，而采用反射机制的话，它就可以不用卸载，只需要在运行时才动态的创建和编译，就可以实现该功能。</p>
+</li>
+<li>缺点<br>对性能有影响。使用反射基本上是一种解释操作，我们可以告诉JVM，我们希望做什么并且它满足我们的要求。这类操作总是慢于只直接执行相同的操作。</li>
+</ul>
+<h2 id="理解Class类和类类型"><a href="#理解Class类和类类型" class="headerlink" title="理解Class类和类类型"></a>理解Class类和类类型</h2><p>想要了解反射首先理解一下Class类，它是反射实现的基础。<br>类是java.lang.Class类的实例对象，而Class是所有类的类（There is a class named Class）<br>对于普通的对象，我们一般都会这样创建和表示：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Code code1 = <span class="keyword">new</span> Code();</span><br></pre></td></tr></table></figure></p>
+<p>上面说了，所有的类都是Class的对象，那么如何表示呢，可不可以通过如下方式呢：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Class c = <span class="keyword">new</span> Class();</span><br></pre></td></tr></table></figure></p>
+<p>但是我们查看Class的源码时，是这样写的：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span>  <span class="title">Class</span><span class="params">(ClassLoader loader)</span> </span>&#123; </span><br><span class="line">    classLoader = loader; </span><br><span class="line">&#125;</span><br><span class="line">``` </span><br><span class="line">可以看到构造器是私有的，只有JVM可以创建Class的对象，因此不可以像普通类一样<span class="keyword">new</span>一个Class对象，虽然我们不能<span class="keyword">new</span>一个Class对象，但是却可以通过已有的类得到一个Class对象，共有三种方式，如下：</span><br><span class="line">``` java</span><br><span class="line">Class c1 = Code.class;</span><br><span class="line">这说明任何一个类都有一个隐含的静态成员变量<span class="class"><span class="keyword">class</span>，这种方式是通过获取类的静态成员变量<span class="title">class</span>得到的</span><br><span class="line"><span class="title">Class</span> <span class="title">c2</span> </span>= code1.getClass();</span><br><span class="line">code1是Code的一个对象，这种方式是通过一个类的对象的getClass()方法获得的</span><br><span class="line">Class c3 = Class.forName(<span class="string">"com.trigl.reflect.Code"</span>);</span><br><span class="line">这种方法是Class类调用forName方法，通过一个类的全量限定名获得</span><br></pre></td></tr></table></figure></p>
+<p>这里，c1、c2、c3都是Class的对象，他们是完全一样的，而且有个学名，叫做Code的类类型（class type）。<br>这里就让人奇怪了，前面不是说Code是Class的对象吗，而c1、c2、c3也是Class的对象，那么Code和c1、c2、c3不就一样了吗？为什么还叫Code什么类类型？这里不要纠结于它们是否相同，只要理解类类型是干什么的就好了，顾名思义，类类型就是类的类型，也就是描述一个类是什么，都有哪些东西，所以我们可以通过类类型知道一个类的属性和方法，并且可以调用一个类的属性和方法，这就是反射的基础。</p>
+<p>举个简单例子代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReflectDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> ClassNotFoundException </span>&#123;</span><br><span class="line">        <span class="comment">//第一种：Class c1 = Code.class;</span></span><br><span class="line">        Class class1=ReflectDemo.class;</span><br><span class="line">        System.out.println(class1.getName());</span><br><span class="line"></span><br><span class="line">        <span class="comment">//第二种：Class c2 = code1.getClass();</span></span><br><span class="line">        ReflectDemo demo2= <span class="keyword">new</span> ReflectDemo();</span><br><span class="line">        Class c2 = demo2.getClass();</span><br><span class="line">        System.out.println(c2.getName());</span><br><span class="line"></span><br><span class="line">        <span class="comment">//第三种：Class c3 = Class.forName("com.trigl.reflect.Code");</span></span><br><span class="line">        Class class3 = Class.forName(<span class="string">"com.tengj.reflect.ReflectDemo"</span>);</span><br><span class="line">        System.out.println(class3.getName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>执行结果：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">com.tengj.reflect.ReflectDemo</span><br><span class="line">com.tengj.reflect.ReflectDemo</span><br><span class="line">com.tengj.reflect.ReflectDemo</span><br></pre></td></tr></table></figure></p>
+<h2 id="Java反射相关操作"><a href="#Java反射相关操作" class="headerlink" title="Java反射相关操作"></a>Java反射相关操作</h2><p>前面我们知道了怎么获取Class，那么我们可以通过这个Class干什么呢？<br>总结如下：</p>
+<ul>
+<li>获取成员方法Method</li>
+<li>获取成员变量Field</li>
+<li>获取构造函数Constructor</li>
+</ul>
+<p>下面来具体介绍</p>
+<h3 id="获取成员方法信息"><a href="#获取成员方法信息" class="headerlink" title="获取成员方法信息"></a>获取成员方法信息</h3><p>单独获取某一个方法是通过Class类的以下方法获得的：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Method <span class="title">getDeclaredMethod</span><span class="params">(String name, Class&lt;?&gt;... parameterTypes)</span> <span class="comment">// 得到该类所有的方法，不包括父类的</span></span><br><span class="line"><span class="keyword">public</span> Method <span class="title">getMethod</span><span class="params">(String name, Class&lt;?&gt;... parameterTypes)</span> <span class="comment">// 得到该类所有的public方法，包括父类的</span></span></span><br></pre></td></tr></table></figure></p>
+<p>两个参数分别是方法名和方法参数类的类类型列表。<br>例如类A有如下一个方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">fun</span><span class="params">(String name,<span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"我叫"</span>+name+<span class="string">",今年"</span>+age+<span class="string">"岁"</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>现在知道A有一个对象a，那么就可以通过：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Class c = Class.forName(<span class="string">"com.tengj.reflect.Person"</span>);  <span class="comment">//先生成class</span></span><br><span class="line">Object o = c.newInstance();                           <span class="comment">//newInstance可以初始化一个实例</span></span><br><span class="line">Method method = c.getMethod(<span class="string">"fun"</span>, String.class, <span class="keyword">int</span>.class);<span class="comment">//获取方法</span></span><br><span class="line">method.invoke(o, <span class="string">"tengj"</span>, <span class="number">10</span>);                              <span class="comment">//通过invoke调用该方法，参数第一个为实例对象，后面为具体参数值</span></span><br></pre></td></tr></table></figure></p>
+<p>完整代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line">    <span class="keyword">private</span> String msg=<span class="string">"hello wrold"</span>;</span><br><span class="line"> <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> age;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Person</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Person</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">  System.out.println(name);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">fun</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"fun"</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">fun</span><span class="params">(String name,<span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"我叫"</span>+name+<span class="string">",今年"</span>+age+<span class="string">"岁"</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReflectDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Class c = Class.forName(<span class="string">"com.tengj.reflect.Person"</span>);</span><br><span class="line">            Object o = c.newInstance();</span><br><span class="line">            Method method = c.getMethod(<span class="string">"fun"</span>, String.class, <span class="keyword">int</span>.class);</span><br><span class="line">            method.invoke(o, <span class="string">"tengj"</span>, <span class="number">10</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>执行结果：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">我叫tengj,今年<span class="number">10</span>岁</span><br></pre></td></tr></table></figure></p>
+<p>怎样，是不是感觉很厉害，我们只要知道这个类的路径全称就能玩弄它于鼓掌之间。</p>
+<p>有时候我们想获取类中所有成员方法的信息，要怎么办。可以通过以下几步来实现：<br>1.获取所有方法的数组：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Class c = Class.forName(&#34;com.tengj.reflect.Person&#34;);&#10;Method[] methods = c.getDeclaredMethods(); // &#24471;&#21040;&#35813;&#31867;&#25152;&#26377;&#30340;&#26041;&#27861;&#65292;&#19981;&#21253;&#25324;&#29238;&#31867;&#30340;&#10;&#25110;&#32773;&#65306;&#10;Method[] methods = c.getMethods();// &#24471;&#21040;&#35813;&#31867;&#25152;&#26377;&#30340;public&#26041;&#27861;&#65292;&#21253;&#25324;&#29238;&#31867;&#30340;</span><br></pre></td></tr></table></figure></p>
+<p>2.然后循环这个数组就得到每个方法了：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (Method method : methods)</span><br></pre></td></tr></table></figure></p>
+<p>完整代码如下：<br>person类跟上面一样，这里以及后面就不贴出来了，只贴关键代码<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReflectDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Class c = Class.forName(<span class="string">"com.tengj.reflect.Person"</span>);</span><br><span class="line">            Method[] methods = c.getDeclaredMethods();</span><br><span class="line">            <span class="keyword">for</span>(Method m:methods)&#123;</span><br><span class="line">                String  methodName= m.getName();</span><br><span class="line">                System.out.println(methodName);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>执行结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getName&#10;setName&#10;setAge&#10;fun&#10;fun&#10;getAge</span><br></pre></td></tr></table></figure></p>
+<p>这里如果把c.getDeclaredMethods();改成c.getMethods();执行结果如下，多了很多方法，以为把Object里面的方法也打印出来了，因为Object是所有类的父类：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">getName</span><br><span class="line">setName</span><br><span class="line">getAge</span><br><span class="line">setAge</span><br><span class="line">fun</span><br><span class="line">fun</span><br><span class="line">wait</span><br><span class="line">wait</span><br><span class="line">wait</span><br><span class="line">equals</span><br><span class="line">toString</span><br><span class="line">hashCode</span><br><span class="line">getClass</span><br><span class="line">notify</span><br><span class="line">notifyAll</span><br></pre></td></tr></table></figure></p>
+<h3 id="获取成员变量信息"><a href="#获取成员变量信息" class="headerlink" title="获取成员变量信息"></a>获取成员变量信息</h3><p>想一想成员变量中都包括什么：成员变量类型+成员变量名<br>类的成员变量也是一个对象，它是<code>java.lang.reflect.Field</code>的一个对象，所以我们通过<code>java.lang.reflect.Field</code>里面封装的方法来获取这些信息。</p>
+<p>单独获取某个成员变量，通过Class类的以下方法实现：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Field <span class="title">getDeclaredField</span><span class="params">(String name)</span> <span class="comment">// 获得该类自身声明的所有变量，不包括其父类的变量</span></span><br><span class="line"><span class="keyword">public</span> Field <span class="title">getField</span><span class="params">(String name)</span> <span class="comment">// 获得该类自所有的public成员变量，包括其父类变量</span></span></span><br></pre></td></tr></table></figure></p>
+<p>参数是成员变量的名字。<br>例如一个类A有如下成员变量：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> n;</span><br></pre></td></tr></table></figure></p>
+<p>如果A有一个对象a，那么就可以这样得到其成员变量：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Class c = a.getClass();</span><br><span class="line">Field field = c.getDeclaredField(<span class="string">"n"</span>);</span><br></pre></td></tr></table></figure></p>
+<p>完整代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReflectDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Class c = Class.forName(<span class="string">"com.tengj.reflect.Person"</span>);</span><br><span class="line">            <span class="comment">//获取成员变量</span></span><br><span class="line">            Field field = c.getDeclaredField(<span class="string">"msg"</span>); <span class="comment">//因为msg变量是private的，所以不能用getField方法</span></span><br><span class="line">            Object o = c.newInstance();</span><br><span class="line">            field.setAccessible(<span class="keyword">true</span>);<span class="comment">//设置是否允许访问，因为该变量是private的，所以要手动设置允许访问，如果msg是public的就不需要这行了。</span></span><br><span class="line">            Object msg = field.get(o);</span><br><span class="line">            System.out.println(msg);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>执行结果：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hello wrold</span><br></pre></td></tr></table></figure></p>
+<p>同样，如果想要获取所有成员变量的信息，可以通过以下几步<br>1.获取所有成员变量的数组：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Field[] fields = c.getDeclaredFields();</span><br></pre></td></tr></table></figure></p>
+<p>2.遍历变量数组，获得某个成员变量field<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">for (Field field : fields)</span><br></pre></td></tr></table></figure></p>
+<p>完整代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReflectDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Class c = Class.forName(<span class="string">"com.tengj.reflect.Person"</span>);</span><br><span class="line">            Field[] fields = c.getDeclaredFields();</span><br><span class="line">            <span class="keyword">for</span>(Field field :fields)&#123;</span><br><span class="line">                System.out.println(field.getName());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>执行结果：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">name</span><br><span class="line">age</span><br><span class="line">msg</span><br></pre></td></tr></table></figure></p>
+<h3 id="获取构造函数"><a href="#获取构造函数" class="headerlink" title="获取构造函数"></a>获取构造函数</h3><p>最后再想一想构造函数中都包括什么：构造函数参数<br>同上，类的成构造函数也是一个对象，它是<code>java.lang.reflect.Constructor</code>的一个对象，所以我们通过<code>java.lang.reflect.Constructor</code>里面封装的方法来获取这些信息。</p>
+<p>单独获取某个构造函数,通过Class类的以下方法实现：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Constructor&lt;T&gt; <span class="title">getDeclaredConstructor</span><span class="params">(Class&lt;?&gt;... parameterTypes)</span> <span class="comment">//  获得该类所有的构造器，不包括其父类的构造器</span></span><br><span class="line"><span class="keyword">public</span> Constructor&lt;T&gt; <span class="title">getConstructor</span><span class="params">(Class&lt;?&gt;... parameterTypes)</span> <span class="comment">// 获得该类所以public构造器，包括父类</span></span></span><br></pre></td></tr></table></figure></p>
+<p>这个参数为构造函数参数类的类类型列表。<br>例如类A有如下一个构造函数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public A(String a, int b) &#123;&#10;    // code body&#10;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>那么就可以通过：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Constructor constructor = a.getDeclaredConstructor(String.class, int.class);</span><br></pre></td></tr></table></figure></p>
+<p>来获取这个构造函数。</p>
+<p>完整代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReflectDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Class c = Class.forName(<span class="string">"com.tengj.reflect.Person"</span>);</span><br><span class="line">            <span class="comment">//获取构造函数</span></span><br><span class="line">            Constructor constructor = c.getDeclaredConstructor(String.class);</span><br><span class="line">            constructor.setAccessible(<span class="keyword">true</span>);<span class="comment">//设置是否允许访问，因为该构造器是private的，所以要手动设置允许访问，如果构造器是public的就不需要这行了。</span></span><br><span class="line">            constructor.newInstance(<span class="string">"tengj"</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>执行结果：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tengj</span><br></pre></td></tr></table></figure></p>
+<p>注意：Class的newInstance方法，只能创建只包含无参数的构造函数的类，如果某类只有带参数的构造函数，那么就要使用另外一种方式：fromClass.getDeclaredConstructor(String.class).newInstance(“tengj”);</p>
+<p>获取所有的构造函数，可以通过以下步骤实现：<br>1.获取该类的所有构造函数，放在一个数组中：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Constructor[] constructors = c.getDeclaredConstructors();</span><br></pre></td></tr></table></figure></p>
+<p>2.遍历构造函数数组，获得某个构造函数constructor:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (Constructor constructor : constructors)</span><br></pre></td></tr></table></figure></p>
+<p>完整代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReflectDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">            Constructor[] constructors = c.getDeclaredConstructors();</span><br><span class="line">            <span class="keyword">for</span>(Constructor constructor:constructors)&#123;</span><br><span class="line">                System.out.println(constructor);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>执行结果：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> com.tengj.reflect.Person()</span><br><span class="line"><span class="keyword">public</span> com.tengj.reflect.Person(java.lang.String)</span><br></pre></td></tr></table></figure></p>
+<h2 id="通过反射了解集合泛型的本质"><a href="#通过反射了解集合泛型的本质" class="headerlink" title="通过反射了解集合泛型的本质"></a>通过反射了解集合泛型的本质</h2><p>首先下结论：</p>
+<blockquote>
+<p>Java中集合的泛型，是防止错误输入的，只在编译阶段有效，绕过编译到了运行期就无效了。</p>
+</blockquote>
+<p>下面通过一个实例来验证：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span><br><span class="line"> * 集合泛型的本质</span><br><span class="line"> * <span class="doctag">@description</span></span><br><span class="line"> * <span class="doctag">@author</span> Trigl</span><br><span class="line"> * <span class="doctag">@date</span> 2016年4月2日上午2:54:11</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GenericEssence</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List list1 = <span class="keyword">new</span> ArrayList(); <span class="comment">// 没有泛型 </span></span><br><span class="line">        List&lt;String&gt; list2 = <span class="keyword">new</span> ArrayList&lt;String&gt;(); <span class="comment">// 有泛型</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">/*</span><br><span class="line">         * 1.首先观察正常添加元素方式，在编译器检查泛型，</span><br><span class="line">         * 这个时候如果list2添加int类型会报错</span><br><span class="line">         */</span></span><br><span class="line">        list2.add(<span class="string">"hello"</span>);</span><br><span class="line"><span class="comment">//      list2.add(20); // 报错！list2有泛型限制，只能添加String，添加int报错</span></span><br><span class="line">        System.out.println(<span class="string">"list2的长度是："</span> + list2.size()); <span class="comment">// 此时list2长度为1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">/*</span><br><span class="line">         * 2.然后通过反射添加元素方式，在运行期动态加载类，首先得到list1和list2</span><br><span class="line">         * 的类类型相同，然后再通过方法反射绕过编译器来调用add方法，看能否插入int</span><br><span class="line">         * 型的元素</span><br><span class="line">         */</span></span><br><span class="line">        Class c1 = list1.getClass();</span><br><span class="line">        Class c2 = list2.getClass();</span><br><span class="line">        System.out.println(c1 == c2); <span class="comment">// 结果：true，说明类类型完全相同</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 验证：我们可以通过方法的反射来给list2添加元素，这样可以绕过编译检查</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Method m = c2.getMethod(<span class="string">"add"</span>, Object.class); <span class="comment">// 通过方法反射得到add方法</span></span><br><span class="line">            m.invoke(list2, <span class="number">20</span>); <span class="comment">// 给list2添加一个int型的，上面显示在编译器是会报错的</span></span><br><span class="line">            System.out.println(<span class="string">"list2的长度是："</span> + list2.size()); <span class="comment">// 结果：2，说明list2长度增加了，并没有泛型检查</span></span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/*</span><br><span class="line">         * 综上可以看出，在编译器的时候，泛型会限制集合内元素类型保持一致，但是编译器结束进入</span><br><span class="line">         * 运行期以后，泛型就不再起作用了，即使是不同类型的元素也可以插入集合。</span><br><span class="line">         */</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>执行结果：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">list2的长度是：<span class="number">1</span></span><br><span class="line"><span class="keyword">true</span></span><br><span class="line">list2的长度是：<span class="number">2</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>到此，Java反射机制入门的差不多了，我是复习SpringMVC里面IOC/DI的时候，是通过Java反射来实现的，希望这篇笔记也对你有用。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="http://www.cnblogs.com/hxsyl/archive/2013/03/23/2977593.html" target="_blank" rel="external">Java反射机制深入详解</a><br><a href="http://blog.csdn.net/trigl/article/details/51042403" target="_blank" rel="external">Java反射入门</a><br><a href="http://www.cnblogs.com/jqyp/archive/2012/03/29/2423112.html" target="_blank" rel="external">Java反射机制</a><br><a href="http://www.cnblogs.com/rollenholt/archive/2011/09/02/2163758.html" target="_blank" rel="external">java反射详解</a><br><a href="http://www.cnblogs.com/gulvzhe/archive/2012/01/27/2330001.html" target="_blank" rel="external">Java 反射机制浅析</a><br><a href="http://uule.iteye.com/blog/1423512" target="_blank" rel="external">反射机制的理解及其用途</a></p>
+<h1 id="整理的思维导图"><a href="#整理的思维导图" class="headerlink" title="整理的思维导图"></a>整理的思维导图</h1><p>个人整理的Java反射机制的思维导图,导出的图片无法查看备注的一些信息，所以需要源文件的童鞋可以关注我个人主页上的公众号，回复<strong>反射机制</strong>即可获取源文件。<br><img src="http://7xqch5.com1.z0.glb.clouddn.com/Javareflect.png" alt=""></p>
+<hr>
+<p>博主弄了个java学习资源的公众号，学习资源超级多，视频，电子书，最新开发工具一个都不能少，已全部分享到百度云盘，求资源共享，打造一个学习方便，工作方便的java公众号，开源开源，有需求的可以关注~撒花<br>  <img src="http://7xqch5.com1.z0.glb.clouddn.com/javaLearn.PNG" alt=""></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/04/28/javareflect/">Java基础与提高干货系列——Java反射机制</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Teng Jun</a></p>
+        <p><span>发布时间:</span>2016-04-28, 20:04:00</p>
+        <p><span>最后更新:</span>2017-03-18, 08:14:32</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/04/28/javareflect/" title="Java基础与提高干货系列——Java反射机制">http://tengj.top/2016/04/28/javareflect/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://tengj.top/2016/04/28/javareflect/　　作者: Teng Jun" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2016/05/02/springmvcyuanli/">
+                    springMVC干货系列：从零搭建springMVC+mybatis（二）：springMVC原理解析及常用注解
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2016/04/24/thread1/">
+                    Java多线程干货系列—（一）Java多线程基础
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#正文"><span class="toc-number">2.</span> <span class="toc-text">正文</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Java反射机制定义"><span class="toc-number">2.1.</span> <span class="toc-text">Java反射机制定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#反射机制的优点与缺点"><span class="toc-number">2.2.</span> <span class="toc-text">反射机制的优点与缺点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#理解Class类和类类型"><span class="toc-number">2.3.</span> <span class="toc-text">理解Class类和类类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Java反射相关操作"><span class="toc-number">2.4.</span> <span class="toc-text">Java反射相关操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#获取成员方法信息"><span class="toc-number">2.4.1.</span> <span class="toc-text">获取成员方法信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#获取成员变量信息"><span class="toc-number">2.4.2.</span> <span class="toc-text">获取成员变量信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#获取构造函数"><span class="toc-number">2.4.3.</span> <span class="toc-text">获取构造函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#通过反射了解集合泛型的本质"><span class="toc-number">2.5.</span> <span class="toc-text">通过反射了解集合泛型的本质</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">参考</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#整理的思维导图"><span class="toc-number">5.</span> <span class="toc-text">整理的思维导图</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"Java基础与提高干货系列——Java反射机制　| 嘟嘟独立博客　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section class="youyan" id="comments">
+    <script>
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = 'http://v2.uyan.cc/code/uyan.js?uid=2129071';
+            (d.head || d.body).appendChild(s);
+        }
+    </script>
+    
+    <aside class="comment-bar">
+        <a href="javascript:void(0);">
+            <i class="fa fa-commenting-o animated infinite pulse"></i>
+            <i class="fa fa-spinner fa-pulse"></i>
+            <span class="count-comment"></span>
+        </a>
+    </aside>
+    <script>
+        var $commentBar = $("#comments aside.comment-bar");
+        var load$hide = function(){
+            $commentBar.find("a > i").toggle();
+            loadComment();
+            $commentBar.fadeOut(800);
+        }
+        $commentBar.click(function(){
+            load$hide();
+        })
+        $commentBar.children("a").hover(function(){
+            load$hide();
+        })
+        if (window.location.hash === "#comments") {
+            load$hide();
+        }
+    </script>
+
+    <div id="uyan_frame"></div>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/05/02/springmvcyuanli/" title="上一篇: springMVC干货系列：从零搭建springMVC+mybatis（二）：springMVC原理解析及常用注解">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2016/04/24/thread1/" title="下一篇: Java多线程干货系列—（一）Java多线程基础">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/listary/">精品软件推荐—Listary一款高效人士必备搜索增强工具</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/springboot5/">Spring Boot干货系列：（五）开发Web应用之JSP篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/springboot4/">Spring Boot干货系列：（四）开发Web应用之Thymeleaf篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/09/springboot3/">Spring Boot干货系列：（三）启动原理解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/28/springboot2/">Spring Boot干货系列：（二）配置文件解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/28/springbootconfig/">Spring Boot干货系列：常用属性汇总</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/26/springboot1/">Spring Boot干货系列：（一）优雅的入门篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/22/idea1-1/">Java人员正确使用 IntelliJ IDEA的方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/24/wk01/">如何制作微课系列——（第一天）微课选题怎么玩？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/12/springmvc4aop/">SpringMVC干货系列：从零搭建SpringMVC+mybatis（四）：Spring两大核心之AOP学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/06/threadvolatile4/">Java多线程干货系列—（四）volatile关键字</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/03/threadsynchronized2/">Java多线程干货系列—（二）synchronized</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/springmvctotal/">springMVC干货系列：从零搭建springMVC+mybatis（总纲）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/springmvc3iocdi/">springMVC干货系列：从零搭建springMVC+mybatis（三）：spring两大核心之IOC/DI学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/springmvcyuanli/">springMVC干货系列：从零搭建springMVC+mybatis（二）：springMVC原理解析及常用注解</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/28/javareflect/">Java基础与提高干货系列——Java反射机制</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/24/thread1/">Java多线程干货系列—（一）Java多线程基础</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/17/sjms7adapter/">设计模式干货系列：（七）适配器模式【学习难度：★★☆☆☆，使用频率：★★★★☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/16/javajh5hashset/">Java集合干货系列-（五）HashSet源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/16/javajh4treemap/">Java集合干货系列-（四）TreeMap源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/15/javajh3hashmap/">Java集合干货系列-（三）HashMap源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/javajh2linklist/">Java集合干货系列-（二）LinkedList源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/javajh1arraylist/">Java集合干货系列-（一）ArrayList源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/12/javajhtotal/">Java集合干货系列-集合总体大纲</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/09/sjms6builder/">设计模式干货系列：（六）建造者模式【学习难度：★★★★☆，使用频率：★★☆☆☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/07/sjms5prototype/">设计模式干货系列：（五）原型模式【学习难度：★★★☆☆，使用频率：★★★☆☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/06/sjms4singleton/">设计模式干货系列：（四）单例模式【学习难度：★☆☆☆☆，使用频率：★★★★☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/04/sjms3abstractfactory/">设计模式干货系列：（三）抽象工厂模式【学习难度：★★★★☆，使用频率：★★★★★】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/03/sjms2factorymethod/">设计模式干货系列：（二）工厂方法模式【学习难度：★★☆☆☆，使用频率：★★★★★】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/02/sjms1simpleFactory/">设计模式干货系列：（一）简单工厂模式【学习难度：★★☆☆☆，使用频率：★★★☆☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/01/sjmstotal/">设计模式干货系列：（总纲）总体介绍设计模式</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/29/git6gitlab/">git干货系列：（六）公司内部搭建git服务器</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/27/git5branch/">git干货系列：（五）多人协同工作之分支管理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/25/git4remote/">git干货系列：（四）我要连接远程仓库（github，coding）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/24/git3reset/">git干货系列：（三）我提交错了我想撤销或者回退版本</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/23/git2konwindex/">git干货系列：（二）深入学习之前先理解git暂存区</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/apprecommend1/">提高办事效率-奇妙清单</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/20/git1creategit/">git干货系列：（一）我是小白，我想要搭建git仓库</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/20/gitTotalMsg/">git干货系列：（总纲）根据使用场景介绍git</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/20/hexo8hidewidgets/">hexo干货系列：（八）hexo文章自动隐藏侧边栏</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/17/hexo7count/">hexo干货系列：（七）hexo安装统计插件</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/baidunoshouluresson/">百度链接提交主动推送后不收录的原因</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/hexo6seo/">hexo干货系列：（六）hexo提交搜索引擎（百度+谷歌）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/13/springmvcseries1/">springMVC干货系列：从零搭建springMVC+mybatis（一）：maven WEB项目的搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/12/hightsearchline/">使用高级搜索指令提高搜索效率（百度，谷歌）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/11/hexo5Swiftype/">hexo干货系列：（五）hexo添加站内搜索</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/10/jqueryLoading/">ajax一个很好的加载效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/06/hexo4/">hexo干货系列：（四）将hexo博客同时托管到github和coding</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/06/hexo3/">hexo干货系列：（三）hexo的Jacman主题优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/26/hexo2/">hexo干货系列：（二）hexo主题下载及配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/25/myeclipsetomcat/">myeclipse中tomcat内存溢出完美解决方案</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/22/hexo1/">hexo干货系列：（一）hexo+gitHub搭建个人独立博客</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/20/hexoTotal/">hexo干货系列：（总纲）搭建独立博客初衷</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+	
+	
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257841330'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1257841330%26online%3D1%26show%3Dline' type='text/javascript'%3E%3C/script%3E"));
+	</script>
+	
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2017 Teng Jun
+            </div>
+            <div class="footer-right">
+                <a href="http://www.miitbeian.gov.cn/" target="_blank">闽ICP备17006673号</a>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Teng Jun" />
+
+
+
+<meta name="description" content="今天介绍下单例模式，单例模式（Singleton Pattern）是 Java 中最简单的设计模式之一。这种类型的设计模式属于创建型模式，它提供了一种创建对象的最佳方式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="设计模式干货系列：（四）单例模式【学习难度：★☆☆☆☆，使用频率：★★★★☆】">
+<meta property="og:url" content="http://tengj.top/2016/04/06/sjms4singleton/index.html">
+<meta property="og:site_name" content="嘟嘟独立博客">
+<meta property="og:description" content="今天介绍下单例模式，单例模式（Singleton Pattern）是 Java 中最简单的设计模式之一。这种类型的设计模式属于创建型模式，它提供了一种创建对象的最佳方式。">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1637925-60cf9464d0d2cb16.gif?imageMogr2/auto-orient/strip">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/javaLearn.PNG">
+<meta property="og:updated_time" content="2017-03-18T00:08:31.046Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="设计模式干货系列：（四）单例模式【学习难度：★☆☆☆☆，使用频率：★★★★☆】">
+<meta name="twitter:description" content="今天介绍下单例模式，单例模式（Singleton Pattern）是 Java 中最简单的设计模式之一。这种类型的设计模式属于创建型模式，它提供了一种创建对象的最佳方式。">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="嘟嘟独立博客" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/img/author.jpg">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css" type="text/css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>设计模式干货系列：（四）单例模式【学习难度：★☆☆☆☆，使用频率：★★★★☆】 | 嘟嘟独立博客</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script>
+        yiliaConfig.jquery_ui = [true, "//cdn.bootcss.com/jqueryui/1.10.4/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/dudu.gif" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">嘟嘟独立博客</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">爱生活爱编码</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="/358593266@qq.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="http://weibo.com/u/2550837117" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/tengj" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa 简书" href="http://www.jianshu.com/u/a7f72d78fe0d" title="简书"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/IDEA/">IDEA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jQuery/">jQuery</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/listary/">listary</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springMVC/">springMVC</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">专注于前端</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Teng Jun</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/dudu.gif" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Teng Jun</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">爱生活爱编码</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="/358593266@qq.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="http://weibo.com/u/2550837117" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/tengj" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa 简书" target="_blank" href="http://www.jianshu.com/u/a7f72d78fe0d" title="简书"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-sjms4singleton" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/04/06/sjms4singleton/" class="article-date">
+      <time datetime="2016-04-06T13:48:55.000Z" itemprop="datePublished">2016-04-06</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      设计模式干货系列：（四）单例模式【学习难度：★☆☆☆☆，使用频率：★★★★☆】
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/设计模式/">设计模式</a>
+    </div>
+
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>今天介绍下单例模式，单例模式（Singleton Pattern）是 Java 中最简单的设计模式之一。这种类型的设计模式属于创建型模式，它提供了一种创建对象的最佳方式。</p>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><p>举个常见的单例模式例子，我们日常使用的电脑上都有一个回收站，在整个操作系统中，回收站只能有一个实例，整个系统都使用这个唯一的实例，而且回收站自行提供自己的实例。因此回收站是单例模式的应用。</p>
+<h2 id="单例模式概念"><a href="#单例模式概念" class="headerlink" title="单例模式概念"></a>单例模式概念</h2><p><strong>单例模式(Singleton Pattern)</strong>：确保某一个类只有一个实例，而且自行实例化并向整个系统提供这个实例，这个类称为单例类，它提供全局访问的方法。单例模式是一种<code>对象创建型模式</code>。</p>
+<h2 id="单例模式结构图"><a href="#单例模式结构图" class="headerlink" title="单例模式结构图"></a>单例模式结构图</h2><p>单例模式是结构最简单的设计模式一，在它的核心结构中只包含一个被称为单例类的特殊类。<br><strong>单例模式有三个特性：</strong></p>
+<ul>
+<li>单例类只能有一个实例</li>
+<li>单例类必须自行创建自己的唯一的实例</li>
+<li>单例类必须给所有其他对象提供这一实例</li>
+</ul>
+<p>单例模式结构如图所示：<br><img src="http://upload-images.jianshu.io/upload_images/1637925-60cf9464d0d2cb16.gif?imageMogr2/auto-orient/strip" alt="">  </p>
+<p> 单例模式结构图中只包含一个单例角色：</p>
+<ul>
+<li><code>Singleton</code>（单例）：在单例类的内部实现只生成一个实例，同时它提供一个静态的<code>getInstance()</code>工厂方法，让客户可以访问它的唯一实例；为了防止在外部对其实例化，将其构造函数设计为<code>私有</code>；在单例类内部定义了一个<code>Singleton</code>类型的<code>静态</code>对象，作为外部共享的唯一实例。</li>
+</ul>
+<h2 id="单例模式的几种实现方式"><a href="#单例模式的几种实现方式" class="headerlink" title="单例模式的几种实现方式"></a>单例模式的几种实现方式</h2><p>单例模式的实现有多种方式，如下所示：</p>
+<h3 id="1、懒汉式，线程不安全"><a href="#1、懒汉式，线程不安全" class="headerlink" title="1、懒汉式，线程不安全"></a>1、懒汉式，线程不安全</h3><blockquote>
+<p>是否 Lazy 初始化：是<br>是否多线程安全：否<br>实现难度：易<br>描述：这种方式是最基本的实现方式，这种实现最大的问题就是不支持多线程。因为没有加锁 <code>synchronized</code>，所以严格意义上它并不算单例模式。<br>这种方式 <code>lazy loading</code> 很明显，不要求线程安全，在多线程不能正常工作。</p>
+</blockquote>
+<p>代码实例：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span> <span class="params">()</span></span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">        instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>接下来介绍的几种实现方式都支持多线程，但是在性能上有所差异。</strong></p>
+<h3 id="2、懒汉式，线程安全"><a href="#2、懒汉式，线程安全" class="headerlink" title="2、懒汉式，线程安全"></a>2、懒汉式，线程安全</h3><blockquote>
+<p>是否 Lazy 初始化：是<br>是否多线程安全：是<br>实现难度：易<br>描述：这种方式具备很好的 <code>lazy loading</code>，能够在多线程中很好的工作，但是，效率很低，99% 情况下不需要同步。<br>优点：第一次调用才初始化，避免内存浪费。<br>缺点：必须加锁 <code>synchronized</code> 才能保证单例，但加锁会影响效率。<br><code>getInstance()</code> 的性能对应用程序不是很关键（该方法使用不太频繁）。</p>
+</blockquote>
+<p>代码实例：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span> <span class="params">()</span></span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">        instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="3、饿汉式"><a href="#3、饿汉式" class="headerlink" title="3、饿汉式"></a>3、饿汉式</h3><blockquote>
+<p>是否 Lazy 初始化：否<br>是否多线程安全：是<br>实现难度：易<br>描述：这种方式比较常用，但容易产生垃圾对象。<br>优点：没有加锁，执行效率会提高。<br>缺点：类加载时就初始化，浪费内存。<br>它基于<code>classloder</code>机制避免了多线程的同步问题，不过，<code>instance</code>在类装载时就实例化，虽然导致类装载的原因有很多种，在单例模式中大多数都是调用<code>getInstance</code>方法， 但是也不能确定有其他的方式（或者其他的静态方法）导致类装载，这时候初始化<code>instance</code>显然没有达到<code>lazy loading</code>的效果。</p>
+</blockquote>
+<p>代码实例：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton instance = <span class="keyword">new</span> Singleton();  </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span> <span class="params">()</span></span>&#123;&#125;  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> instance;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="4、双检锁-双检查锁（DCL，即-double-checked-locking）"><a href="#4、双检锁-双检查锁（DCL，即-double-checked-locking）" class="headerlink" title="4、双检锁/双检查锁（DCL，即 double-checked locking）"></a>4、双检锁/双检查锁（DCL，即 double-checked locking）</h3><blockquote>
+<p>JDK 版本：JDK1.5 起<br>是否 Lazy 初始化：是<br>是否多线程安全：是<br>实现难度：较复杂<br>描述：这种方式称为双重检查锁(Double-Check Locking)，需要注意的是，如果使用双重检查锁定来实现懒汉式单例类，需要在静态成员变量<code>instance</code>之前增加<strong>修饰符volatile</strong>，被<code>volatile</code>修饰的成员变量可以确保多个线程都能够正确处理，且该代码只能在JDK 1.5及以上版本中才能正确执行。由于<code>volatile</code>关键字会屏蔽Java虚拟机所做的一些代码优化，可能会导致系统运行效率降低，因此即使使用双重检查锁定来实现单例模式也不是一种完美的实现方式。</p>
+</blockquote>
+<p>代码实例：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">static</span> Singleton singleton;  </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span> <span class="params">()</span></span>&#123;&#125;  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getSingleton</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;  </span><br><span class="line">        <span class="keyword">synchronized</span> (Singleton.class) &#123;  </span><br><span class="line">        <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;  </span><br><span class="line">            singleton = <span class="keyword">new</span> Singleton();  </span><br><span class="line">        &#125;  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">return</span> singleton;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="5、静态内部类"><a href="#5、静态内部类" class="headerlink" title="5、静态内部类"></a>5、静态内部类</h3><blockquote>
+<p>是否 Lazy 初始化：是<br>是否多线程安全：是<br>实现难度：一般<br>描述：饿汉式单例类不能实现延迟加载，不管将来用不用始终占据内存；懒汉式单例类线程安全控制烦琐，而且性能受影响。可见，无论是饿汉式单例还是懒汉式单例都存在这样那样的问题，有没有一种方法，能够将两种单例的缺点都克服，而将两者的优点合二为一呢？答案是：Yes！下面我们来学习这种更好的被称之为<strong>Initialization Demand Holder (IoDH)</strong>的技术。在<code>IoDH</code>中，我们在单例类中增加一个<strong>静态(static)内部类</strong>，在该内部类中创建单例对象，再将该单例对象通过<code>getInstance()</code>方法返回给外部使用。由于静态单例对象没有作为<code>Singleton</code>的成员变量直接实例化，因此类加载时不会实例化<code>Singleton</code>，第一次调用<code>getInstance()</code>时将加载内部类<code>SingletonHolder</code>，在该内部类中定义了一个<code>static</code>类型的变量<code>instance</code>，此时会首先初始化这个成员变量，由Java虚拟机来保证其线程安全性，确保该成员变量只能初始化一次。由于<code>getInstance()</code>方法没有任何线程锁定，因此其性能不会造成任何影响。通过使用<code>IoDH</code>，我们既可以实现延迟加载，又可以保证线程安全，不影响系统性能，不失为一种最好的Java语言单例模式实现方式**（其缺点是与编程语言本身的特性相关，很多面向对象语言不支持<code>IoDH</code>）。  </p>
+</blockquote>
+<p>代码实例：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SingletonHolder</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton INSTANCE = <span class="keyword">new</span> Singleton();  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span> <span class="params">()</span></span>&#123;&#125;  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> SingletonHolder.INSTANCE;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="6、枚举"><a href="#6、枚举" class="headerlink" title="6、枚举"></a>6、枚举</h3><p>JDK 版本：JDK1.5 起</p>
+<blockquote>
+<p>是否 Lazy 初始化：否<br>是否多线程安全：是<br>实现难度：易<br>描述：这种实现方式还没有被广泛采用，但这是实现单例模式的最佳方法。它更简洁，自动支持序列化机制，绝对防止多次实例化。<br>这种方式是<code>Effective Java</code>作者<code>Josh Bloch</code>提倡的方式，它不仅能避免多线程同步问题，而且还自动支持序列化机制，防止反序列化重新创建新的对象，绝对防止多次实例化。不过，由于 JDK1.5 之后才加入 enum 特性，用这种方式写不免让人感觉生疏，在实际工作中，也很少用。<br>不能通过<code>reflection attack</code>来调用私有构造方法。</p>
+</blockquote>
+<p>代码实例：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> Singleton &#123;  </span><br><span class="line">    INSTANCE;  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">whateverMethod</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>经验之谈：</strong>一般情况下，不建议使用第 1 种和第 2 种懒汉方式，建议使用第 3 种饿汉方式。只有在要明确实现<code>lazy loading</code>效果时，才会使用第 5 种登记方式。如果涉及到反序列化创建对象时，可以尝试使用第 6 种枚举方式。如果有其他特殊的需求，可以考虑使用第 4 种双检锁方式。</p>
+<h2 id="Java中的语言中的单例模式"><a href="#Java中的语言中的单例模式" class="headerlink" title="Java中的语言中的单例模式"></a>Java中的语言中的单例模式</h2><p>Java语言中就有很多单例模式的应用实例，这里举例一个。</p>
+<h3 id="Java的Runtime对象"><a href="#Java的Runtime对象" class="headerlink" title="Java的Runtime对象"></a>Java的Runtime对象</h3><p>在Java语言内部，<code>java.lang.Runtime</code>对象就是一个使用单例模式的例子。在每一个Java应用程序里面，都有唯一的一个<code>Runtime</code>对象，应用程序可以与其运行环境发生相互作用。<br><code>Runtime</code>类提供一个静态工厂方法<code>getRuntime()</code>:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Runtime <span class="title">getRuntime</span><span class="params">()</span></span>;</span><br></pre></td></tr></table></figure></p>
+<p>通过调用此方法，可以获得<code>Runtime</code>类唯一的一个实例：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Runtime rt=Runtime.getRuntime();</span><br></pre></td></tr></table></figure></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>单例模式作为一种目标明确、结构简单、理解容易的设计模式，在软件开发中使用频率相当高，在很多应用软件和框架中都得以广泛应用。</p>
+<p><strong>1.主要优点</strong><br>单例模式的主要优点如下：</p>
+<ul>
+<li>单例模式提供了对唯一实例的受控访问。因为单例类封装了它的唯一实例，所以它可以严格控制客户怎样以及何时访问它。</li>
+<li>由于在系统内存中只存在一个对象，因此可以节约系统资源，对于一些需要频繁创建和销毁的对象单例模式无疑可以提高系统的性能。</li>
+<li>允许可变数目的实例。基于单例模式我们可以进行扩展，使用与单例控制相似的方法来获得指定个数的对象实例，既节省系统资源，又解决了单例单例对象共享过多有损性能的问题。</li>
+</ul>
+<p><strong>2.主要缺点</strong><br> 单例模式的主要缺点如下：</p>
+<ul>
+<li>由于单例模式中没有抽象层，因此单例类的扩展有很大的困难。</li>
+<li>单例类的职责过重，在一定程度上违背了“单一职责原则”。因为单例类既充当了工厂角色，提供了工厂方法，同时又充当了产品角色，包含一些业务方法，将产品的创建和产品的本身的功能融合到一起。</li>
+<li>现在很多面向对象语言(如Java、C#)的运行环境都提供了自动垃圾回收的技术，因此，如果实例化的共享对象长时间不被利用，系统会认为它是垃圾，会自动销毁并回收资源，下次利用时又将重新实例化，这将导致共享的单例对象状态的丢失。</li>
+</ul>
+<p><strong>3.适用场景</strong><br>在以下情况下可以考虑使用单例模式：</p>
+<ul>
+<li>系统只需要一个实例对象，如系统要求提供一个唯一的序列号生成器或资源管理器，或者需要考虑资源消耗太大而只允许创建一个对象。</li>
+<li>客户调用类的单个实例只允许使用一个公共访问点，除了该公共访问点，不能通过其他途径访问该实例。</li>
+</ul>
+<hr>
+<h2 id="如果对你有所帮助-●ˇ∀ˇ●-点个赞吧。被接收是对我最大的鼓励。"><a href="#如果对你有所帮助-●ˇ∀ˇ●-点个赞吧。被接收是对我最大的鼓励。" class="headerlink" title="如果对你有所帮助(●ˇ∀ˇ●)点个赞吧。被接收是对我最大的鼓励。"></a>如果对你有所帮助(●ˇ∀ˇ●)<code>点个赞</code>吧。被接收是对我最大的鼓励。</h2><p>最近撸了个java的公众号，学习资源超级多，视频，电子书，最新开发工具一个都不能少，已全部分享到百度云盘，求资源共享，打造一个学习方便，工作方便的java公众号，开源开源，有需求的可以关注~撒花<br><img src="http://7xqch5.com1.z0.glb.clouddn.com/javaLearn.PNG" alt=""></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/04/06/sjms4singleton/">设计模式干货系列：（四）单例模式【学习难度：★☆☆☆☆，使用频率：★★★★☆】</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Teng Jun</a></p>
+        <p><span>发布时间:</span>2016-04-06, 21:48:55</p>
+        <p><span>最后更新:</span>2017-03-18, 08:08:31</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/04/06/sjms4singleton/" title="设计模式干货系列：（四）单例模式【学习难度：★☆☆☆☆，使用频率：★★★★☆】">http://tengj.top/2016/04/06/sjms4singleton/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://tengj.top/2016/04/06/sjms4singleton/　　作者: Teng Jun" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2016/04/07/sjms5prototype/">
+                    设计模式干货系列：（五）原型模式【学习难度：★★★☆☆，使用频率：★★★☆☆】
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2016/04/04/sjms3abstractfactory/">
+                    设计模式干货系列：（三）抽象工厂模式【学习难度：★★★★☆，使用频率：★★★★★】
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#正文"><span class="toc-number">2.</span> <span class="toc-text">正文</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#单例模式概念"><span class="toc-number">2.1.</span> <span class="toc-text">单例模式概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#单例模式结构图"><span class="toc-number">2.2.</span> <span class="toc-text">单例模式结构图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#单例模式的几种实现方式"><span class="toc-number">2.3.</span> <span class="toc-text">单例模式的几种实现方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1、懒汉式，线程不安全"><span class="toc-number">2.3.1.</span> <span class="toc-text">1、懒汉式，线程不安全</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2、懒汉式，线程安全"><span class="toc-number">2.3.2.</span> <span class="toc-text">2、懒汉式，线程安全</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3、饿汉式"><span class="toc-number">2.3.3.</span> <span class="toc-text">3、饿汉式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4、双检锁-双检查锁（DCL，即-double-checked-locking）"><span class="toc-number">2.3.4.</span> <span class="toc-text">4、双检锁/双检查锁（DCL，即 double-checked locking）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5、静态内部类"><span class="toc-number">2.3.5.</span> <span class="toc-text">5、静态内部类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6、枚举"><span class="toc-number">2.3.6.</span> <span class="toc-text">6、枚举</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Java中的语言中的单例模式"><span class="toc-number">2.4.</span> <span class="toc-text">Java中的语言中的单例模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Java的Runtime对象"><span class="toc-number">2.4.1.</span> <span class="toc-text">Java的Runtime对象</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#如果对你有所帮助-●ˇ∀ˇ●-点个赞吧。被接收是对我最大的鼓励。"><span class="toc-number">3.1.</span> <span class="toc-text">如果对你有所帮助(●ˇ∀ˇ●)点个赞吧。被接收是对我最大的鼓励。</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"设计模式干货系列：（四）单例模式【学习难度：★☆☆☆☆，使用频率：★★★★☆】　| 嘟嘟独立博客　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section class="youyan" id="comments">
+    <script>
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = 'http://v2.uyan.cc/code/uyan.js?uid=2129071';
+            (d.head || d.body).appendChild(s);
+        }
+    </script>
+    
+    <aside class="comment-bar">
+        <a href="javascript:void(0);">
+            <i class="fa fa-commenting-o animated infinite pulse"></i>
+            <i class="fa fa-spinner fa-pulse"></i>
+            <span class="count-comment"></span>
+        </a>
+    </aside>
+    <script>
+        var $commentBar = $("#comments aside.comment-bar");
+        var load$hide = function(){
+            $commentBar.find("a > i").toggle();
+            loadComment();
+            $commentBar.fadeOut(800);
+        }
+        $commentBar.click(function(){
+            load$hide();
+        })
+        $commentBar.children("a").hover(function(){
+            load$hide();
+        })
+        if (window.location.hash === "#comments") {
+            load$hide();
+        }
+    </script>
+
+    <div id="uyan_frame"></div>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/04/07/sjms5prototype/" title="上一篇: 设计模式干货系列：（五）原型模式【学习难度：★★★☆☆，使用频率：★★★☆☆】">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2016/04/04/sjms3abstractfactory/" title="下一篇: 设计模式干货系列：（三）抽象工厂模式【学习难度：★★★★☆，使用频率：★★★★★】">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/listary/">精品软件推荐—Listary一款高效人士必备搜索增强工具</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/springboot5/">Spring Boot干货系列：（五）开发Web应用之JSP篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/springboot4/">Spring Boot干货系列：（四）开发Web应用之Thymeleaf篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/09/springboot3/">Spring Boot干货系列：（三）启动原理解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/28/springboot2/">Spring Boot干货系列：（二）配置文件解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/28/springbootconfig/">Spring Boot干货系列：常用属性汇总</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/26/springboot1/">Spring Boot干货系列：（一）优雅的入门篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/22/idea1-1/">Java人员正确使用 IntelliJ IDEA的方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/24/wk01/">如何制作微课系列——（第一天）微课选题怎么玩？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/12/springmvc4aop/">SpringMVC干货系列：从零搭建SpringMVC+mybatis（四）：Spring两大核心之AOP学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/06/threadvolatile4/">Java多线程干货系列—（四）volatile关键字</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/03/threadsynchronized2/">Java多线程干货系列—（二）synchronized</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/springmvctotal/">springMVC干货系列：从零搭建springMVC+mybatis（总纲）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/springmvc3iocdi/">springMVC干货系列：从零搭建springMVC+mybatis（三）：spring两大核心之IOC/DI学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/springmvcyuanli/">springMVC干货系列：从零搭建springMVC+mybatis（二）：springMVC原理解析及常用注解</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/28/javareflect/">Java基础与提高干货系列——Java反射机制</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/24/thread1/">Java多线程干货系列—（一）Java多线程基础</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/17/sjms7adapter/">设计模式干货系列：（七）适配器模式【学习难度：★★☆☆☆，使用频率：★★★★☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/16/javajh5hashset/">Java集合干货系列-（五）HashSet源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/16/javajh4treemap/">Java集合干货系列-（四）TreeMap源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/15/javajh3hashmap/">Java集合干货系列-（三）HashMap源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/javajh2linklist/">Java集合干货系列-（二）LinkedList源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/javajh1arraylist/">Java集合干货系列-（一）ArrayList源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/12/javajhtotal/">Java集合干货系列-集合总体大纲</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/09/sjms6builder/">设计模式干货系列：（六）建造者模式【学习难度：★★★★☆，使用频率：★★☆☆☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/07/sjms5prototype/">设计模式干货系列：（五）原型模式【学习难度：★★★☆☆，使用频率：★★★☆☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/06/sjms4singleton/">设计模式干货系列：（四）单例模式【学习难度：★☆☆☆☆，使用频率：★★★★☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/04/sjms3abstractfactory/">设计模式干货系列：（三）抽象工厂模式【学习难度：★★★★☆，使用频率：★★★★★】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/03/sjms2factorymethod/">设计模式干货系列：（二）工厂方法模式【学习难度：★★☆☆☆，使用频率：★★★★★】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/02/sjms1simpleFactory/">设计模式干货系列：（一）简单工厂模式【学习难度：★★☆☆☆，使用频率：★★★☆☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/01/sjmstotal/">设计模式干货系列：（总纲）总体介绍设计模式</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/29/git6gitlab/">git干货系列：（六）公司内部搭建git服务器</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/27/git5branch/">git干货系列：（五）多人协同工作之分支管理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/25/git4remote/">git干货系列：（四）我要连接远程仓库（github，coding）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/24/git3reset/">git干货系列：（三）我提交错了我想撤销或者回退版本</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/23/git2konwindex/">git干货系列：（二）深入学习之前先理解git暂存区</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/apprecommend1/">提高办事效率-奇妙清单</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/20/git1creategit/">git干货系列：（一）我是小白，我想要搭建git仓库</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/20/gitTotalMsg/">git干货系列：（总纲）根据使用场景介绍git</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/20/hexo8hidewidgets/">hexo干货系列：（八）hexo文章自动隐藏侧边栏</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/17/hexo7count/">hexo干货系列：（七）hexo安装统计插件</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/baidunoshouluresson/">百度链接提交主动推送后不收录的原因</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/hexo6seo/">hexo干货系列：（六）hexo提交搜索引擎（百度+谷歌）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/13/springmvcseries1/">springMVC干货系列：从零搭建springMVC+mybatis（一）：maven WEB项目的搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/12/hightsearchline/">使用高级搜索指令提高搜索效率（百度，谷歌）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/11/hexo5Swiftype/">hexo干货系列：（五）hexo添加站内搜索</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/10/jqueryLoading/">ajax一个很好的加载效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/06/hexo4/">hexo干货系列：（四）将hexo博客同时托管到github和coding</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/06/hexo3/">hexo干货系列：（三）hexo的Jacman主题优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/26/hexo2/">hexo干货系列：（二）hexo主题下载及配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/25/myeclipsetomcat/">myeclipse中tomcat内存溢出完美解决方案</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/22/hexo1/">hexo干货系列：（一）hexo+gitHub搭建个人独立博客</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/20/hexoTotal/">hexo干货系列：（总纲）搭建独立博客初衷</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+	
+	
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257841330'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1257841330%26online%3D1%26show%3Dline' type='text/javascript'%3E%3C/script%3E"));
+	</script>
+	
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2017 Teng Jun
+            </div>
+            <div class="footer-right">
+                <a href="http://www.miitbeian.gov.cn/" target="_blank">闽ICP备17006673号</a>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

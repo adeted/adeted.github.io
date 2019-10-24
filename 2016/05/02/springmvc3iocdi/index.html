@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Teng Jun" />
+
+
+
+<meta name="description" content="上篇讲了SpringMVC的实现原理以及常用的注解，其实里面都用到的spring的核心概念，那就是IOC/DI，今天给大家介绍下这核心概念IOC/DI。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="springMVC干货系列：从零搭建springMVC+mybatis（三）：spring两大核心之IOC/DI学习">
+<meta property="og:url" content="http://tengj.top/2016/05/02/springmvc3iocdi/index.html">
+<meta property="og:site_name" content="嘟嘟独立博客">
+<meta property="og:description" content="上篇讲了SpringMVC的实现原理以及常用的注解，其实里面都用到的spring的核心概念，那就是IOC/DI，今天给大家介绍下这核心概念IOC/DI。">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/springmvc3_2.jpg">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/springmvc3_3.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/springmvc3_1.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/javaLearn.PNG">
+<meta property="og:updated_time" content="2017-03-18T00:13:28.442Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="springMVC干货系列：从零搭建springMVC+mybatis（三）：spring两大核心之IOC/DI学习">
+<meta name="twitter:description" content="上篇讲了SpringMVC的实现原理以及常用的注解，其实里面都用到的spring的核心概念，那就是IOC/DI，今天给大家介绍下这核心概念IOC/DI。">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="嘟嘟独立博客" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/img/author.jpg">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css" type="text/css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>springMVC干货系列：从零搭建springMVC+mybatis（三）：spring两大核心之IOC/DI学习 | 嘟嘟独立博客</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script>
+        yiliaConfig.jquery_ui = [true, "//cdn.bootcss.com/jqueryui/1.10.4/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/dudu.gif" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">嘟嘟独立博客</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">爱生活爱编码</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="/358593266@qq.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="http://weibo.com/u/2550837117" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/tengj" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa 简书" href="http://www.jianshu.com/u/a7f72d78fe0d" title="简书"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/IDEA/">IDEA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jQuery/">jQuery</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/listary/">listary</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springMVC/">springMVC</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">专注于前端</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Teng Jun</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/dudu.gif" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Teng Jun</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">爱生活爱编码</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="/358593266@qq.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="http://weibo.com/u/2550837117" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/tengj" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa 简书" target="_blank" href="http://www.jianshu.com/u/a7f72d78fe0d" title="简书"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-springmvc3iocdi" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/05/02/springmvc3iocdi/" class="article-date">
+      <time datetime="2016-05-02T10:21:16.000Z" itemprop="datePublished">2016-05-02</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      springMVC干货系列：从零搭建springMVC+mybatis（三）：spring两大核心之IOC/DI学习
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/springMVC干货系列/">springMVC干货系列</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/springMVC/">springMVC</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>上篇讲了SpringMVC的实现原理以及常用的注解，其实里面都用到的spring的核心概念，那就是IOC/DI，今天给大家介绍下这核心概念IOC/DI。</p>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><p>分享Iteye的开涛这位技术牛人对Spring框架的IOC的理解,写得非常通俗易懂。</p>
+<h2 id="IoC是什么"><a href="#IoC是什么" class="headerlink" title="IoC是什么"></a>IoC是什么</h2><p>Ioc—Inversion of Control，即“控制反转”，不是什么技术，而是一种设计思想。在Java开发中，Ioc意味着将你设计好的对象交给容器控制，而不是传统的在你的对象内部直接控制。如何理解好Ioc呢？理解好Ioc的关键是要明确“谁控制谁，控制什么，为何是反转（有反转就应该有正转了），哪些方面反转了”，那我们来深入分析一下：</p>
+<ul>
+<li><p>谁控制谁，控制什么：传统Java SE程序设计，我们直接在对象内部通过new进行创建对象，是程序主动去创建依赖对象；而IoC是有专门一个容器来创建这些对象，即由Ioc容器来控制对 象的创建；谁控制谁？当然是IoC 容器控制了对象；控制什么？那就是主要控制了外部资源获取（不只是对象包括比如文件等）。</p>
+</li>
+<li><p>为何是反转，哪些方面反转了：有反转就有正转，传统应用程序是由我们自己在对象中主动控制去直接获取依赖对象，也就是正转；而反转则是由容器来帮忙创建及注入依赖对象；为何是反转？因为由容器帮我们查找及注入依赖对象，对象只是被动的接受依赖对象，所以是反转；哪些方面反转了？依赖对象的获取被反转了。</p>
+</li>
+</ul>
+<p>用图例说明一下，传统程序设计如图2-1，都是主动去创建相关对象然后再组合起来：<br><img src="http://7xqch5.com1.z0.glb.clouddn.com/springmvc3_2.jpg" alt=""></p>
+<p>当有了IoC/DI的容器后，在客户端类中不再主动去创建这些对象了，如图所示:<br><img src="http://7xqch5.com1.z0.glb.clouddn.com/springmvc3_3.png" alt="">  </p>
+<h2 id="IoC能做什么"><a href="#IoC能做什么" class="headerlink" title="IoC能做什么"></a>IoC能做什么</h2><p>IoC 不是一种技术，只是一种思想，一个重要的面向对象编程的法则，它能指导我们如何设计出松耦合、更优良的程序。传统应用程序都是由我们在类内部主动创建依赖对象，从而导致类与类之间高耦合，难于测试；有了IoC容器后，把创建和查找依赖对象的控制权交给了容器，由容器进行注入组合对象，所以对象与对象之间是 松散耦合，这样也方便测试，利于功能复用，更重要的是使得程序的整个体系结构变得非常灵活。</p>
+<p>其实IoC对编程带来的最大改变不是从代码上，而是从思想上，发生了“主从换位”的变化。应用程序原本是老大，要获取什么资源都是主动出击，但是在IoC/DI思想中，应用程序就变成被动的了，被动的等待IoC容器来创建并注入它所需要的资源了。</p>
+<p>IoC很好的体现了面向对象设计法则之一—— 好莱坞法则：“别找我们，我们找你”；即由IoC容器帮对象找相应的依赖对象并注入，而不是由对象主动去找。</p>
+<h2 id="IoC和DI"><a href="#IoC和DI" class="headerlink" title="IoC和DI"></a>IoC和DI</h2><p> DI—Dependency Injection，即“依赖注入”：组件之间依赖关系由容器在运行期决定，形象的说，即由容器动态的将某个依赖关系注入到组件之中。依赖注入的目的并非为软件系统带来更多功能，而是为了提升组件重用的频率，并为系统搭建一个灵活、可扩展的平台。通过依赖注入机制，我们只需要通过简单的配置，而无需任何代码就可指定目标需要的资源，完成自身的业务逻辑，而不需要关心具体的资源来自何处，由谁实现。</p>
+<p>理解DI的关键是：“谁依赖谁，为什么需要依赖，谁注入谁，注入了什么”，那我们来深入分析一下：</p>
+<ul>
+<li><p>谁依赖于谁：当然是应用程序依赖于IoC容器；</p>
+</li>
+<li><p>为什么需要依赖：应用程序需要IoC容器来提供对象需要的外部资源；</p>
+</li>
+<li><p>谁注入谁：很明显是IoC容器注入应用程序某个对象，应用程序依赖的对象；</p>
+</li>
+<li><p>注入了什么：就是注入某个对象所需要的外部资源（包括对象、资源、常量数据）。</p>
+</li>
+</ul>
+<p>IoC和DI由什么关系呢？其实它们是同一个概念的不同角度描述，由于控制反转概念比较含糊（可能只是理解为容器控制对象这一个层面，很难让人想到谁来维护对象关系），所以2004年大师级人物Martin Fowler又给出了一个新的名字：“依赖注入”，相对IoC 而言，“依赖注入”明确描述了“被注入对象依赖IoC容器配置依赖对象”。</p>
+<p>看过很多对Spring的Ioc理解的文章，好多人对Ioc和DI的解释都晦涩难懂，反正就是一种说不清，道不明的感觉，读完之后依然是一头雾水，感觉就是开涛这位技术牛人写得特别通俗易懂，他清楚地解释了IoC(控制反转) 和DI(依赖注入)中的每一个字，读完之后给人一种豁然开朗的感觉。我相信对于初学Spring框架的人对Ioc的理解应该是有很大帮助的。</p>
+<h2 id="Spring配置的可选方案"><a href="#Spring配置的可选方案" class="headerlink" title="Spring配置的可选方案"></a>Spring配置的可选方案</h2><p>上面介绍了IOC跟DI的概念，接着，我将归纳一下使用Spring装备bean的基础知识，因为DI是Spring的最基本要素。所以在开发的基于Spring的应用时，我们随时都在使用这些技术。<br>当描述bean如何进行装配时，Spring具有非常大的灵活性，它提供了三种主要的装配机制：  </p>
+<ul>
+<li>在XML中进行显示配置</li>
+<li>在Java中进行显示配置</li>
+<li>隐式的bean发现机制和自动装配</li>
+</ul>
+<p>虽然看上去提供三种可选的配置方案会使Spring变得复杂。其实，你可以根据实际项目选择，对了，上面这三种其实可以混合搭配，目前博主使用的就是自动装配（也就是注解）+XML混合使用。这也是目前比较流行的方式。</p>
+<p>下面将主要介绍自动化装备Bean+XML的混合搭配</p>
+<h2 id="自动化装配bean"><a href="#自动化装配bean" class="headerlink" title="自动化装配bean"></a>自动化装配bean</h2><p>当前来说，相比较前面两种显示配置，从便利性方面来看，最强大的还是Spring的自动化配置。<br>Spring从两个角度来实现自动化装配：  </p>
+<ul>
+<li>组件扫描（component scanning）:Spring会自动发现应用上下文中所创建的bean</li>
+<li>自动装配（autowiring）：Spring自动满足bean之间的依赖</li>
+</ul>
+<p>组件扫描和自动装配组合在一起就能发挥出强大的威力，他们能够将你的显示配置降低到最少。</p>
+<p>这里组件扫描我们通过在XML里面使用Spring context命名空间的<context:component-scan>元素来启用。<br>配置如下：  </context:component-scan></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 加了下面2局就可以直接使用spring注解 --&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 自动扫描的包名 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">context:component-scan</span> <span class="attribute">base-package</span>=<span class="value">"com.tengj.demo"</span> /&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 默认的注解映射的支持 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">mvc:annotation-driven</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<p>context:component-scan里面的 base-package指明了被扫描的包的路径是在com.tengj.demo下面的所有类  </p>
+<p>其中mvc:annotation-driven 是开启默认的注解映射的支持，这样就能认到被使用的注解。<br>我们在com.tengj.demo下面创建一个UserController控制类：  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserController</span></span>&#123;</span><br><span class="line">    <span class="annotation">@Autowired</span></span><br><span class="line">	UserService userService;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>UserService是我们的一个接口，代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserService</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addUser</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>UserServiceImpl是UserService的实现类：  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@Service</span>(<span class="string">"userService"</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserServiceImpl</span> <span class="keyword">implements</span> <span class="title">UserService</span></span>&#123;</span><br><span class="line"><span class="annotation">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addUser</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">"新增用户"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>写个单元测试类来验证这个userService是否已经自动注入了  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@RunWith</span>(SpringJUnit4ClassRunner.class)</span><br><span class="line"><span class="annotation">@ContextConfiguration</span>(&#123;<span class="string">"classpath:spring/applicationContext.xml"</span>&#125;)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserConTrollerTest</span> </span>&#123;</span><br><span class="line">	<span class="annotation">@Autowired</span></span><br><span class="line">	UserService userService;</span><br><span class="line">	</span><br><span class="line">	<span class="annotation">@Test</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">checkServiceIsNull</span><span class="params">()</span></span>&#123;</span><br><span class="line">		Assert.assertNotNull(userService);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>UserConTrollerTest使用了Spring的SpringJUnit4ClassRunner，以便在测试开始的时候自动创建Spring的应用上下文，注解@ContextConfiguration会告诉它需要在UserConTrollerTest中加载配置。所以读取applicationContext.xml配置文件，配置文件里面有<context:component-scan base-package="com.tengj.demo">这个启用自动扫描的元素。  </context:component-scan></p>
+<p>为了证明这一点，在测试代码中有一个UserService类型的属性，并且这个属性带有@Autowired注解，以便于将UserService bean注入到测试代码之中。最后，会有一个简单的测试方法断言userService属性不为null。如果它不为null的话，就意味着Spring能够发现UserService类，自动在Spring上下文中将其创建为bean并将其注入到测试代码之中。  </p>
+<p>在代码中右键执行Junit Test，如果执行如下是绿色的就表示成功。  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/springmvc3_1.png" alt=""></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这就是一个简单的DI注入测试，是不是觉得很方便，要注入什么属性只要定义一下属性。剩下都交给Spring容器来搞定。Junit单元测试写法后续会专门写一篇来介绍，这也是非常重要的一个验证自己所写代码是否正确的手段。</p>
+<hr>
+<p>一直觉得自己写的不是技术，而是情怀，一篇篇文章是自己这一路走来的痕迹。靠专业技能的成功是最具可复制性的，希望我的这条路能让你少走弯路，希望我能帮你抹去知识的蒙尘，希望我能帮你理清知识的脉络，希望未来技术之巅上有你也有我。</p>
+<hr>
+<p> 博主弄了个java学习资源的公众号，学习资源超级多，视频，电子书，最新开发工具一个都不能少，已全部分享到百度云盘，求资源共享，打造一个学习方便，工作方便的java公众号，开源开源，有需求的可以关注~撒花<br> <img src="http://7xqch5.com1.z0.glb.clouddn.com/javaLearn.PNG" alt=""></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/05/02/springmvc3iocdi/">springMVC干货系列：从零搭建springMVC+mybatis（三）：spring两大核心之IOC/DI学习</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Teng Jun</a></p>
+        <p><span>发布时间:</span>2016-05-02, 18:21:16</p>
+        <p><span>最后更新:</span>2017-03-18, 08:13:28</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/05/02/springmvc3iocdi/" title="springMVC干货系列：从零搭建springMVC+mybatis（三）：spring两大核心之IOC/DI学习">http://tengj.top/2016/05/02/springmvc3iocdi/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://tengj.top/2016/05/02/springmvc3iocdi/　　作者: Teng Jun" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2016/05/02/springmvctotal/">
+                    springMVC干货系列：从零搭建springMVC+mybatis（总纲）
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2016/05/02/springmvcyuanli/">
+                    springMVC干货系列：从零搭建springMVC+mybatis（二）：springMVC原理解析及常用注解
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#正文"><span class="toc-number">2.</span> <span class="toc-text">正文</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#IoC是什么"><span class="toc-number">2.1.</span> <span class="toc-text">IoC是什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IoC能做什么"><span class="toc-number">2.2.</span> <span class="toc-text">IoC能做什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#IoC和DI"><span class="toc-number">2.3.</span> <span class="toc-text">IoC和DI</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring配置的可选方案"><span class="toc-number">2.4.</span> <span class="toc-text">Spring配置的可选方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自动化装配bean"><span class="toc-number">2.5.</span> <span class="toc-text">自动化装配bean</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"springMVC干货系列：从零搭建springMVC+mybatis（三）：spring两大核心之IOC/DI学习　| 嘟嘟独立博客　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section class="youyan" id="comments">
+    <script>
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = 'http://v2.uyan.cc/code/uyan.js?uid=2129071';
+            (d.head || d.body).appendChild(s);
+        }
+    </script>
+    
+    <aside class="comment-bar">
+        <a href="javascript:void(0);">
+            <i class="fa fa-commenting-o animated infinite pulse"></i>
+            <i class="fa fa-spinner fa-pulse"></i>
+            <span class="count-comment"></span>
+        </a>
+    </aside>
+    <script>
+        var $commentBar = $("#comments aside.comment-bar");
+        var load$hide = function(){
+            $commentBar.find("a > i").toggle();
+            loadComment();
+            $commentBar.fadeOut(800);
+        }
+        $commentBar.click(function(){
+            load$hide();
+        })
+        $commentBar.children("a").hover(function(){
+            load$hide();
+        })
+        if (window.location.hash === "#comments") {
+            load$hide();
+        }
+    </script>
+
+    <div id="uyan_frame"></div>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/05/02/springmvctotal/" title="上一篇: springMVC干货系列：从零搭建springMVC+mybatis（总纲）">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2016/05/02/springmvcyuanli/" title="下一篇: springMVC干货系列：从零搭建springMVC+mybatis（二）：springMVC原理解析及常用注解">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/listary/">精品软件推荐—Listary一款高效人士必备搜索增强工具</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/springboot5/">Spring Boot干货系列：（五）开发Web应用之JSP篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/springboot4/">Spring Boot干货系列：（四）开发Web应用之Thymeleaf篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/09/springboot3/">Spring Boot干货系列：（三）启动原理解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/28/springboot2/">Spring Boot干货系列：（二）配置文件解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/28/springbootconfig/">Spring Boot干货系列：常用属性汇总</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/26/springboot1/">Spring Boot干货系列：（一）优雅的入门篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/22/idea1-1/">Java人员正确使用 IntelliJ IDEA的方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/24/wk01/">如何制作微课系列——（第一天）微课选题怎么玩？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/12/springmvc4aop/">SpringMVC干货系列：从零搭建SpringMVC+mybatis（四）：Spring两大核心之AOP学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/06/threadvolatile4/">Java多线程干货系列—（四）volatile关键字</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/03/threadsynchronized2/">Java多线程干货系列—（二）synchronized</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/springmvctotal/">springMVC干货系列：从零搭建springMVC+mybatis（总纲）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/springmvc3iocdi/">springMVC干货系列：从零搭建springMVC+mybatis（三）：spring两大核心之IOC/DI学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/springmvcyuanli/">springMVC干货系列：从零搭建springMVC+mybatis（二）：springMVC原理解析及常用注解</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/28/javareflect/">Java基础与提高干货系列——Java反射机制</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/24/thread1/">Java多线程干货系列—（一）Java多线程基础</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/17/sjms7adapter/">设计模式干货系列：（七）适配器模式【学习难度：★★☆☆☆，使用频率：★★★★☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/16/javajh5hashset/">Java集合干货系列-（五）HashSet源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/16/javajh4treemap/">Java集合干货系列-（四）TreeMap源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/15/javajh3hashmap/">Java集合干货系列-（三）HashMap源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/javajh2linklist/">Java集合干货系列-（二）LinkedList源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/javajh1arraylist/">Java集合干货系列-（一）ArrayList源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/12/javajhtotal/">Java集合干货系列-集合总体大纲</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/09/sjms6builder/">设计模式干货系列：（六）建造者模式【学习难度：★★★★☆，使用频率：★★☆☆☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/07/sjms5prototype/">设计模式干货系列：（五）原型模式【学习难度：★★★☆☆，使用频率：★★★☆☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/06/sjms4singleton/">设计模式干货系列：（四）单例模式【学习难度：★☆☆☆☆，使用频率：★★★★☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/04/sjms3abstractfactory/">设计模式干货系列：（三）抽象工厂模式【学习难度：★★★★☆，使用频率：★★★★★】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/03/sjms2factorymethod/">设计模式干货系列：（二）工厂方法模式【学习难度：★★☆☆☆，使用频率：★★★★★】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/02/sjms1simpleFactory/">设计模式干货系列：（一）简单工厂模式【学习难度：★★☆☆☆，使用频率：★★★☆☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/01/sjmstotal/">设计模式干货系列：（总纲）总体介绍设计模式</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/29/git6gitlab/">git干货系列：（六）公司内部搭建git服务器</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/27/git5branch/">git干货系列：（五）多人协同工作之分支管理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/25/git4remote/">git干货系列：（四）我要连接远程仓库（github，coding）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/24/git3reset/">git干货系列：（三）我提交错了我想撤销或者回退版本</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/23/git2konwindex/">git干货系列：（二）深入学习之前先理解git暂存区</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/apprecommend1/">提高办事效率-奇妙清单</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/20/git1creategit/">git干货系列：（一）我是小白，我想要搭建git仓库</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/20/gitTotalMsg/">git干货系列：（总纲）根据使用场景介绍git</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/20/hexo8hidewidgets/">hexo干货系列：（八）hexo文章自动隐藏侧边栏</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/17/hexo7count/">hexo干货系列：（七）hexo安装统计插件</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/baidunoshouluresson/">百度链接提交主动推送后不收录的原因</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/hexo6seo/">hexo干货系列：（六）hexo提交搜索引擎（百度+谷歌）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/13/springmvcseries1/">springMVC干货系列：从零搭建springMVC+mybatis（一）：maven WEB项目的搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/12/hightsearchline/">使用高级搜索指令提高搜索效率（百度，谷歌）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/11/hexo5Swiftype/">hexo干货系列：（五）hexo添加站内搜索</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/10/jqueryLoading/">ajax一个很好的加载效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/06/hexo4/">hexo干货系列：（四）将hexo博客同时托管到github和coding</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/06/hexo3/">hexo干货系列：（三）hexo的Jacman主题优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/26/hexo2/">hexo干货系列：（二）hexo主题下载及配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/25/myeclipsetomcat/">myeclipse中tomcat内存溢出完美解决方案</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/22/hexo1/">hexo干货系列：（一）hexo+gitHub搭建个人独立博客</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/20/hexoTotal/">hexo干货系列：（总纲）搭建独立博客初衷</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+	
+	
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257841330'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1257841330%26online%3D1%26show%3Dline' type='text/javascript'%3E%3C/script%3E"));
+	</script>
+	
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2017 Teng Jun
+            </div>
+            <div class="footer-right">
+                <a href="http://www.miitbeian.gov.cn/" target="_blank">闽ICP备17006673号</a>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>
