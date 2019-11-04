@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Teng Jun" />
+
+
+
+<meta name="description" content="因为`gitHub`上的项目是公开的，不适合公司内部项目放在上面，而私人的需要收费，这绝非是我们愿意的。所以找了个跟`gitHub`很相似，但是又免费的`gitLab`。现在将搭建`gitLab`过程记录一下留作参考。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="git干货系列：（六）公司内部搭建git服务器">
+<meta property="og:url" content="http://tengj.top/2016/03/29/git6gitlab/index.html">
+<meta property="og:site_name" content="嘟嘟独立博客">
+<meta property="og:description" content="因为`gitHub`上的项目是公开的，不适合公司内部项目放在上面，而私人的需要收费，这绝非是我们愿意的。所以找了个跟`gitHub`很相似，但是又免费的`gitLab`。现在将搭建`gitLab`过程记录一下留作参考。">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_1.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_2.jpg">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_3.jpg">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_4.jpg">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_5.jpg">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_6.jpg">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_7.jpg">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_9.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_10.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_11.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_12.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_13.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_141.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_15.jpg">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_16.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_17.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_18.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_19.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_20.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_21.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_22.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_23.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_24.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_25.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_26.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_27.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_28.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/git6_29.png">
+<meta property="og:image" content="http://7xqch5.com1.z0.glb.clouddn.com/javaLearn.PNG">
+<meta property="og:updated_time" content="2017-03-18T00:23:22.464Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="git干货系列：（六）公司内部搭建git服务器">
+<meta name="twitter:description" content="因为`gitHub`上的项目是公开的，不适合公司内部项目放在上面，而私人的需要收费，这绝非是我们愿意的。所以找了个跟`gitHub`很相似，但是又免费的`gitLab`。现在将搭建`gitLab`过程记录一下留作参考。">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="嘟嘟独立博客" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/img/author.jpg">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css" type="text/css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>git干货系列：（六）公司内部搭建git服务器 | 嘟嘟独立博客</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script>
+        yiliaConfig.jquery_ui = [true, "//cdn.bootcss.com/jqueryui/1.10.4/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/dudu.gif" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">嘟嘟独立博客</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">爱生活爱编码</p>
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="/358593266@qq.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="http://weibo.com/u/2550837117" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/tengj" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa 简书" href="http://www.jianshu.com/u/a7f72d78fe0d" title="简书"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/IDEA/">IDEA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SEO/">SEO</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jQuery/">jQuery</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/listary/">listary</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/springMVC/">springMVC</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">专注于前端</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Teng Jun</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/dudu.gif" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Teng Jun</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">爱生活爱编码</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="/358593266@qq.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="http://weibo.com/u/2550837117" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/tengj" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                                <a class="fa 简书" target="_blank" href="http://www.jianshu.com/u/a7f72d78fe0d" title="简书"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-git6gitlab" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/03/29/git6gitlab/" class="article-date">
+      <time datetime="2016-03-29T07:24:03.000Z" itemprop="datePublished">2016-03-29</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      git干货系列：（六）公司内部搭建git服务器
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/git/">git</a>
+    </div>
+
+
+        
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>因为<code>gitHub</code>上的项目是公开的，不适合公司内部项目放在上面，而私人的需要收费，这绝非是我们愿意的。所以找了个跟<code>gitHub</code>很相似，但是又免费的<code>gitLab</code>。现在将搭建<code>gitLab</code>过程记录一下留作参考。</p>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><h2 id="gitLab介绍"><a href="#gitLab介绍" class="headerlink" title="gitLab介绍"></a>gitLab介绍</h2><p><a href="https://about.gitlab.com/" target="_blank" rel="external">GitLab</a>是利用 <code>Ruby on Rails</code> 一个开源的版本管理系统，实现一个自托管的Git项目仓库，可通过Web界面进行访问公开的或者私人项目。它拥有与Github类似的功能，能够浏览源代码，管理缺陷和注释。可以管理团队对仓库的访问，它非常易于浏览提交过的版本并提供一个文件历史库。团队成员可以利用内置的简单聊天程序(Wall)进行交流。它还提供一个代码片段收集功能可以轻松实现代码复用，便于日后有需要的时候进行查找。  </p>
+<p>依赖组件：ruby 1.9.3+，MySQL，git，redis， Sidekiq。<br>最低配置CPU 1G，RAM 1G+swap可以支持100用户。</p>
+<h2 id="先连接SSH"><a href="#先连接SSH" class="headerlink" title="先连接SSH"></a>先连接SSH</h2><p>首先要确定<code>ubuntu</code>上安装并且启动了<code>ssh</code>服务,然后还要确保<code>linux</code>系统上的防火墙要关闭,<code>win8</code>的防火墙可以正常开启<br><code>SSH</code>(仿真终端工具有PUTTY，SecureCRT 以及Fterm等）可以<code>google</code>下载的了.<br>步骤:<br>1, 有人说首先要在<code>Virtual Network Editor</code>做<code>NAT</code>的端口映射,其实是不需要的;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps <span class="operator">-e</span>|grep ssh</span><br></pre></td></tr></table></figure></p>
+<p>如果结果中只有<code>ssh-agent</code>,那说明<code>ssh-server</code>还没有启动,一般<code>ubuntu</code>是默认安装<code>ssh</code>的,要是没有安装,可以通过<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install openssh-server</span><br></pre></td></tr></table></figure></p>
+<p>安装ssh服务<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo /etc/init.d/ssh start</span><br></pre></td></tr></table></figure></p>
+<p>启动ssh服务</p>
+<h2 id="初始化root密码"><a href="#初始化root密码" class="headerlink" title="初始化root密码"></a>初始化root密码</h2><p><code>ubuntn</code>刚安装时候<code>root</code>还没有密码，设置一个，使用命令<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo passwd</span><br></pre></td></tr></table></figure></p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_1.png" alt=""></p>
+<h2 id="安装gitlib整合包"><a href="#安装gitlib整合包" class="headerlink" title="安装gitlib整合包"></a>安装gitlib整合包</h2><p><a href="https://about.gitlab.com/downloads/" target="_blank" rel="external">官方有安装包</a>与脚本下载，<a href="https://about.gitlab.com/installation/" target="_blank" rel="external">官方安装指南</a>。同样GITHUB上有个社区非官方的<a href="https://github.com/gitlabhq/gitlab-recipes" target="_blank" rel="external">安装指南</a>。<br>但这儿里推荐<code>bitnami</code>下载打包安装版本 <a href="https://bitnami.com/stack/gitlab/installer" title="https://bitnami.com/stack/gitlab/installer" target="_blank" rel="external">https://bitnami.com/stack/gitlab/installer</a> ,省去很多时间。他们也提供相关<a href="http://wiki.bitnami.com/Applications/BitNami_GitLab" target="_blank" rel="external">WIKI</a><br>以<a href="http://www.ubuntu.com/download/" target="_blank" rel="external">ubuntu</a>为演示环境，来安装这个包，切换到<code>root</code>账户, 在终端运行：<br>如果没有权限，先授权账号：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chmod <span class="number">777</span> bitnami-gitlab-<span class="number">8.5</span>.<span class="number">7</span>-<span class="number">0</span>-linux-x64-installer.run</span><br></pre></td></tr></table></figure></p>
+<p>然后切换<code>root</code>用户执行：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bitnami-gitlab-<span class="number">8.5</span>.<span class="number">7</span>-<span class="number">0</span>-linux-x64-installer.run</span><br></pre></td></tr></table></figure></p>
+<p>执行后就会弹出图形化界面，一步步确认就行，如下图<br><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_2.jpg" alt="">  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_3.jpg" alt="">  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_4.jpg" alt="">  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_5.jpg" alt="">  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_6.jpg" alt="">  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_7.jpg" alt="">  </p>
+<h2 id="启动命令"><a href="#启动命令" class="headerlink" title="启动命令"></a>启动命令</h2><p>第一次安装好了就默认启动了<code>gitlab</code>，如果要手动启动的话有两种办法<br>1.找到安装好的路径<code>/opt/gitlab-8.5.7-0</code><br>需要<code>root</code>权限执行命令：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sudo ./ctlscript.sh start</span><br><span class="line">```  </span><br><span class="line">![](http://<span class="number">7</span>xqch5.com1.z0.glb.clouddn.com/git6_8.png)  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="number">2</span>.也可以查看`GUI`管理控制台，在`Manage Servers中`选择`Start All`启动所有</span><br><span class="line">``` bash</span><br><span class="line">sudo ./manager-linux-x64.run</span><br></pre></td></tr></table></figure></p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_9.png" alt=""></p>
+<h2 id="登陆系统"><a href="#登陆系统" class="headerlink" title="登陆系统"></a>登陆系统</h2><p>启动后，就可以访问系统页面了，这里先通过ifconfig命令获取当前的ip地址<br><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_10.png" alt=""><br>我的是<code>192.168.153.128</code>，于是就可以在外面<code>window</code>系统浏览器访问  </p>
+<p><a href="http://192.168.153.128/users/sign_in" target="_blank" rel="external">http://192.168.153.128/users/sign_in</a>  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_11.png" alt="">  </p>
+<p>使用我之前配置的<code>git</code>登陆,我之前安装的时候配置的管理员账号是<code>git</code>,密码12345678，<br>这里我登陆后发现跳转到<code>404</code>页面，把地址<code>http://192.168.153.128/users/sign_in</code><br>后面的<code>users/sign_in</code>删掉回车就行,就去后界面如下：  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_12.png" alt="">  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_13.png" alt=""></p>
+<h2 id="创建项目前的设置"><a href="#创建项目前的设置" class="headerlink" title="创建项目前的设置"></a>创建项目前的设置</h2><p>如果你是自己一个人玩就直接创建项目即可，因为我这边是给团队使用的，所以需要创建一下用户组，以及添加组成员，配置权限等，下面来介绍这些配置</p>
+<h2 id="配置服务器邮件"><a href="#配置服务器邮件" class="headerlink" title="配置服务器邮件"></a>配置服务器邮件</h2><p>添加人员或者自己注册的时候需要发邮件激活，所以要先配置服务器，我在<code>bitnami</code>提供的<a href="https://wiki.bitnami.com/Applications/BitNami_GitLab#How_to_configure_the_email_settings_of_GitLab.3f" target="_blank" rel="external">wiki</a>里面找到了办法，原文如下：</p>
+<blockquote>
+<p> <em>How to configure the email settings of GitLab?</em><br>You can configure the SMTP settings during the installation process. If you are using the Virtual Machine or AMI, you can configure it manually. For example, these are the options to configure it using a GMail account:<br>/opt/bitnami/apps/gitlab/htdocs/config/environments/production.rb<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">config.action_mailer.raise_delivery_errors = <span class="literal">true</span></span><br><span class="line">config.action_mailer.delivery_method = :smtp   </span><br><span class="line">config.action_mailer.perform_deliveries = <span class="literal">true</span></span><br><span class="line">config.action_mailer.smtp_settings = &#123;</span><br><span class="line">:address =&gt; <span class="string">"smtp.gmail.com"</span>,</span><br><span class="line">:port =&gt; <span class="number">587</span>,</span><br><span class="line">:domain =&gt; <span class="string">"gmail.com"</span>,</span><br><span class="line">:authentication =&gt; :plain,</span><br><span class="line">:user_name =&gt; <span class="string">"your_account@gmail.com"</span>,</span><br><span class="line">:，password =&gt; <span class="string">"your_password"</span>,</span><br><span class="line">:<span class="built_in">enable</span>_starttls_auto =&gt; <span class="literal">true</span> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>简单的说就是修改<code>/opt/bitnami/apps/gitlab/htdocs/config/environments/production.rb</code>文件，里面的内容，<code>address</code>，<code>domain</code>，<code>user_name</code>，<code>password</code>这几个配置成你自己的邮箱，记得你的邮箱必须要支持<code>smtp</code>。<code>port</code>端口我默认也是587，不需要修改。<br>配置好了邮箱，就要测试一下，我们在<code>http://192.168.153.128/users/sign_in</code> 首页，注册一个额用户，然后我收到邮件激活，然后就可以登陆系统了。<br><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_141.png" alt="">  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_15.jpg" alt="">  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_16.png" alt="">  </p>
+<p>可以看到，非管理员登陆右上角就没有<code>Admin Area</code>功能</p>
+<h2 id="创建小组，添加组内成员"><a href="#创建小组，添加组内成员" class="headerlink" title="创建小组，添加组内成员"></a>创建小组，添加组内成员</h2><p>让组内成员自己注册账号激活后，我们就准备创建小组了，创建小组是为了方便管理，创建项目的时候直接指定小组，这样小组内的成员都可以看到项目  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_17.png" alt="">  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_18.png" alt="">  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_19.png" alt="">  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_20.png" alt="">  </p>
+<h2 id="新增项目"><a href="#新增项目" class="headerlink" title="新增项目"></a>新增项目</h2><p>小组创建好了就可以新增一个项目了,这里创建的时候选择<code>edw</code>这个创建好的小组，并且项目宣称<code>private</code>私有项目。这样只有小组内的成员可以下载这个项目  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_21.png" alt="">  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_22.png" alt="">  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_23.png" alt="">  </p>
+<h2 id="配置SSH-key"><a href="#配置SSH-key" class="headerlink" title="配置SSH key"></a>配置SSH key</h2><p>这里切换到<code>tengj</code>用户登陆，发现已经有了<code>springmvctouchbaidu</code>项目  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_24.png" alt=""><br>但是要下载到本地还需要配置<code>SSH key</code>,复制我们本地<code>\.ssh\id_rsa.pub</code>的内容黏贴到下面图中指定的即可。  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_25.png" alt=""></p>
+<h2 id="远程下载项目"><a href="#远程下载项目" class="headerlink" title="远程下载项目"></a>远程下载项目</h2><p>这里模拟<code>tengj</code>下载远程项目，在这之前我已经用管理员账号把项目传上去了，如图  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_26.png" alt="">  </p>
+<p>指定一个目录存放该项目，执行<code>git clone</code>命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git clone git@192.168.153.128:edw/springmvctouchbaidu.git&#10;Cloning into &#39;springmvctouchbaidu&#39;...&#10;The authenticity of host &#39;192.168.153.128 (192.168.153.128)&#39; can&#39;t be established.&#10;ECDSA key fingerprint is SHA256:1SgfW1DLmaZ9m/E82vVtWjBK1AaP+LMW5U4ng8nv6uE.&#10;Are you sure you want to continue connecting (yes/no)? yes&#10;Warning: Permanently added &#39;192.168.153.128&#39; (ECDSA) to the list of known hosts.&#10;remote: &#23545;&#35937;&#35745;&#25968;&#20013;: 339, &#23436;&#25104;.&#10;remote: &#21387;&#32553;&#23545;&#35937;&#20013;: 100% (242/242), &#23436;&#25104;.&#10;remote: Total 339 (delta 68), reused 339 (delta 68)&#10;Receiving objects: 100% (339/339), 12.97 MiB | 14.44 MiB/s, done.&#10;Resolving deltas: 100% (68/68), done.&#10;Checking connectivity... done.</span><br></pre></td></tr></table></figure></p>
+<p>搞定，下载下来了。</p>
+<h2 id="配置权限"><a href="#配置权限" class="headerlink" title="配置权限"></a>配置权限</h2><p>前面文章也说过，一般一个实际项目中<code>master</code>用来版本发布，一般不在这个分支上开发，所以除了<code>git</code>管理员用户可以提交代码到<code>master</code>外，其他组成员只能<code>push</code>代码到<code>dev</code>这个分支。<br>比如我添加<code>tengj</code>用户的时候选择的是<code>Developer</code>角色，只要在<code>Protected Branches</code>中这个勾不够上就行了。这样开发人员就无法<code>push</code>代码到<code>master</code>分支上。<br><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_27.png" alt="">  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_28.png" alt="">  </p>
+<p>下面模拟一下tengj用户提交代码：  </p>
+<p><img src="http://7xqch5.com1.z0.glb.clouddn.com/git6_29.png" alt="">  </p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>ok，花了三天时间终于搞定了，截图还是蛮累人的哈哈，算是比较详细的记录了我这次安装<code>gitlab</code>的过程，个人感觉比网络上的文章调理清晰多了。一开始查资料快累死了。希望对你有所帮助。</p>
+<hr>
+<p> 最近撸了个java的公众号，学习资源超级多，视频，电子书，最新开发工具一个都不能少，已全部分享到百度云盘，求资源共享，打造一个学习方便，工作方便的java公众号，开源开源，有需求的可以关注~撒花<br> <img src="http://7xqch5.com1.z0.glb.clouddn.com/javaLearn.PNG" alt=""></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/03/29/git6gitlab/">git干货系列：（六）公司内部搭建git服务器</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Teng Jun</a></p>
+        <p><span>发布时间:</span>2016-03-29, 15:24:03</p>
+        <p><span>最后更新:</span>2017-03-18, 08:23:22</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/03/29/git6gitlab/" title="git干货系列：（六）公司内部搭建git服务器">http://tengj.top/2016/03/29/git6gitlab/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://tengj.top/2016/03/29/git6gitlab/　　作者: Teng Jun" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2016/04/01/sjmstotal/">
+                    设计模式干货系列：（总纲）总体介绍设计模式
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2016/03/27/git5branch/">
+                    git干货系列：（五）多人协同工作之分支管理
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#正文"><span class="toc-number">2.</span> <span class="toc-text">正文</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#gitLab介绍"><span class="toc-number">2.1.</span> <span class="toc-text">gitLab介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#先连接SSH"><span class="toc-number">2.2.</span> <span class="toc-text">先连接SSH</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#初始化root密码"><span class="toc-number">2.3.</span> <span class="toc-text">初始化root密码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装gitlib整合包"><span class="toc-number">2.4.</span> <span class="toc-text">安装gitlib整合包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#启动命令"><span class="toc-number">2.5.</span> <span class="toc-text">启动命令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#登陆系统"><span class="toc-number">2.6.</span> <span class="toc-text">登陆系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建项目前的设置"><span class="toc-number">2.7.</span> <span class="toc-text">创建项目前的设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置服务器邮件"><span class="toc-number">2.8.</span> <span class="toc-text">配置服务器邮件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建小组，添加组内成员"><span class="toc-number">2.9.</span> <span class="toc-text">创建小组，添加组内成员</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#新增项目"><span class="toc-number">2.10.</span> <span class="toc-text">新增项目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置SSH-key"><span class="toc-number">2.11.</span> <span class="toc-text">配置SSH key</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#远程下载项目"><span class="toc-number">2.12.</span> <span class="toc-text">远程下载项目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置权限"><span class="toc-number">2.13.</span> <span class="toc-text">配置权限</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"git干货系列：（六）公司内部搭建git服务器　| 嘟嘟独立博客　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+        <section class="youyan" id="comments">
+    <script>
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = 'http://v2.uyan.cc/code/uyan.js?uid=2129071';
+            (d.head || d.body).appendChild(s);
+        }
+    </script>
+    
+    <aside class="comment-bar">
+        <a href="javascript:void(0);">
+            <i class="fa fa-commenting-o animated infinite pulse"></i>
+            <i class="fa fa-spinner fa-pulse"></i>
+            <span class="count-comment"></span>
+        </a>
+    </aside>
+    <script>
+        var $commentBar = $("#comments aside.comment-bar");
+        var load$hide = function(){
+            $commentBar.find("a > i").toggle();
+            loadComment();
+            $commentBar.fadeOut(800);
+        }
+        $commentBar.click(function(){
+            load$hide();
+        })
+        $commentBar.children("a").hover(function(){
+            load$hide();
+        })
+        if (window.location.hash === "#comments") {
+            load$hide();
+        }
+    </script>
+
+    <div id="uyan_frame"></div>
+</section>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/04/01/sjmstotal/" title="上一篇: 设计模式干货系列：（总纲）总体介绍设计模式">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2016/03/27/git5branch/" title="下一篇: git干货系列：（五）多人协同工作之分支管理">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/03/18/listary/">精品软件推荐—Listary一款高效人士必备搜索增强工具</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/springboot5/">Spring Boot干货系列：（五）开发Web应用之JSP篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/13/springboot4/">Spring Boot干货系列：（四）开发Web应用之Thymeleaf篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/09/springboot3/">Spring Boot干货系列：（三）启动原理解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/28/springboot2/">Spring Boot干货系列：（二）配置文件解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/28/springbootconfig/">Spring Boot干货系列：常用属性汇总</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/26/springboot1/">Spring Boot干货系列：（一）优雅的入门篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/02/22/idea1-1/">Java人员正确使用 IntelliJ IDEA的方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/24/wk01/">如何制作微课系列——（第一天）微课选题怎么玩？</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/12/springmvc4aop/">SpringMVC干货系列：从零搭建SpringMVC+mybatis（四）：Spring两大核心之AOP学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/06/threadvolatile4/">Java多线程干货系列—（四）volatile关键字</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/03/threadsynchronized2/">Java多线程干货系列—（二）synchronized</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/springmvctotal/">springMVC干货系列：从零搭建springMVC+mybatis（总纲）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/springmvc3iocdi/">springMVC干货系列：从零搭建springMVC+mybatis（三）：spring两大核心之IOC/DI学习</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/02/springmvcyuanli/">springMVC干货系列：从零搭建springMVC+mybatis（二）：springMVC原理解析及常用注解</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/28/javareflect/">Java基础与提高干货系列——Java反射机制</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/24/thread1/">Java多线程干货系列—（一）Java多线程基础</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/17/sjms7adapter/">设计模式干货系列：（七）适配器模式【学习难度：★★☆☆☆，使用频率：★★★★☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/16/javajh5hashset/">Java集合干货系列-（五）HashSet源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/16/javajh4treemap/">Java集合干货系列-（四）TreeMap源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/15/javajh3hashmap/">Java集合干货系列-（三）HashMap源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/javajh2linklist/">Java集合干货系列-（二）LinkedList源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/javajh1arraylist/">Java集合干货系列-（一）ArrayList源码解析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/12/javajhtotal/">Java集合干货系列-集合总体大纲</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/09/sjms6builder/">设计模式干货系列：（六）建造者模式【学习难度：★★★★☆，使用频率：★★☆☆☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/07/sjms5prototype/">设计模式干货系列：（五）原型模式【学习难度：★★★☆☆，使用频率：★★★☆☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/06/sjms4singleton/">设计模式干货系列：（四）单例模式【学习难度：★☆☆☆☆，使用频率：★★★★☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/04/sjms3abstractfactory/">设计模式干货系列：（三）抽象工厂模式【学习难度：★★★★☆，使用频率：★★★★★】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/03/sjms2factorymethod/">设计模式干货系列：（二）工厂方法模式【学习难度：★★☆☆☆，使用频率：★★★★★】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/02/sjms1simpleFactory/">设计模式干货系列：（一）简单工厂模式【学习难度：★★☆☆☆，使用频率：★★★☆☆】</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/01/sjmstotal/">设计模式干货系列：（总纲）总体介绍设计模式</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/29/git6gitlab/">git干货系列：（六）公司内部搭建git服务器</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/27/git5branch/">git干货系列：（五）多人协同工作之分支管理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/25/git4remote/">git干货系列：（四）我要连接远程仓库（github，coding）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/24/git3reset/">git干货系列：（三）我提交错了我想撤销或者回退版本</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/23/git2konwindex/">git干货系列：（二）深入学习之前先理解git暂存区</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/apprecommend1/">提高办事效率-奇妙清单</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/20/git1creategit/">git干货系列：（一）我是小白，我想要搭建git仓库</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/20/gitTotalMsg/">git干货系列：（总纲）根据使用场景介绍git</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/20/hexo8hidewidgets/">hexo干货系列：（八）hexo文章自动隐藏侧边栏</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/17/hexo7count/">hexo干货系列：（七）hexo安装统计插件</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/baidunoshouluresson/">百度链接提交主动推送后不收录的原因</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/14/hexo6seo/">hexo干货系列：（六）hexo提交搜索引擎（百度+谷歌）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/13/springmvcseries1/">springMVC干货系列：从零搭建springMVC+mybatis（一）：maven WEB项目的搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/12/hightsearchline/">使用高级搜索指令提高搜索效率（百度，谷歌）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/11/hexo5Swiftype/">hexo干货系列：（五）hexo添加站内搜索</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/10/jqueryLoading/">ajax一个很好的加载效果</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/06/hexo4/">hexo干货系列：（四）将hexo博客同时托管到github和coding</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/06/hexo3/">hexo干货系列：（三）hexo的Jacman主题优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/26/hexo2/">hexo干货系列：（二）hexo主题下载及配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/25/myeclipsetomcat/">myeclipse中tomcat内存溢出完美解决方案</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/22/hexo1/">hexo干货系列：（一）hexo+gitHub搭建个人独立博客</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/20/hexoTotal/">hexo干货系列：（总纲）搭建独立博客初衷</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+	
+	
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1257841330'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1257841330%26online%3D1%26show%3Dline' type='text/javascript'%3E%3C/script%3E"));
+	</script>
+	
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2017 Teng Jun
+            </div>
+            <div class="footer-right">
+                <a href="http://www.miitbeian.gov.cn/" target="_blank">闽ICP备17006673号</a>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>
